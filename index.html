@@ -319,6 +319,7 @@
     <button class="btn btn-primary" onclick="openAddModal()">＋ Thêm tài khoản</button>
     <button class="btn btn-success" id="export-btn" onclick="exportXLSX()" style="display:none">⬇ Xuất Excel</button>
     <span id="manage-count" style="font-size:.78rem;color:var(--sub);margin-left:auto"></span>
+    <button class="btn btn-ghost btn-sm" onclick="clearLS()" title="Xoá bộ nhớ cục bộ & tải lại từ file xlsx">🗑 Reset cache</button>
   </div>
   <div class="manage-content">
     <table class="accounts-table">
@@ -417,14 +418,87 @@ let editIndex=-1; // -1 = add mode, >=0 = edit mode
 let selectedApiBank=null; // ngân hàng đang chọn trong modal
 let workbook=null; // giữ lại workbook gốc để xuất
 
+// ========== LOCAL STORAGE ==========
+const LS_KEY_ACCOUNTS="vietqr_accounts";
+const LS_KEY_API="vietqr_api_banks";
+
+function saveToLS(){
+  try{
+    localStorage.setItem(LS_KEY_ACCOUNTS,JSON.stringify(ACCOUNTS));
+  }catch(e){console.warn("LS save failed",e);}
+}
+
+function loadFromLS(){
+  try{
+    const raw=localStorage.getItem(LS_KEY_ACCOUNTS);
+    if(!raw) return false;
+    const data=JSON.parse(raw);
+    if(!Array.isArray(data)||data.length===0) return false;
+    ACCOUNTS=data;
+    // Rebuild BANK_MAP từ accounts đã lưu
+    ACCOUNTS.forEach(acc=>{
+      if(acc.bin&&!BANK_MAP[acc.bin]){
+        BANK_MAP[acc.bin]={logo:acc.logo,shortName:acc.shortName,name:acc.name,code:acc.code};
+      }
+    });
+    document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
+    renderCards(ACCOUNTS);
+    renderManageTable();
+    return true;
+  }catch(e){return false;}
+}
+
+function saveApiBanksToLS(){
+  try{
+    localStorage.setItem(LS_KEY_API,JSON.stringify(API_BANKS));
+  }catch(e){}
+}
+
+function loadApiBanksFromLS(){
+  try{
+    const raw=localStorage.getItem(LS_KEY_API);
+    if(!raw) return false;
+    const data=JSON.parse(raw);
+    if(!Array.isArray(data)||data.length===0) return false;
+    API_BANKS=data;
+    API_BANKS.forEach(r=>{
+      const bin=String(r["data__bin"]||"").trim();
+      if(bin) BANK_MAP[bin]={
+        logo:String(r["data__logo"]||""),
+        shortName:String(r["data__shortName"]||r["data__short_name"]||""),
+        name:String(r["data__name"]||""),
+        code:String(r["data__code"]||""),
+        id:r["data__id"],
+      };
+    });
+    return true;
+  }catch(e){return false;}
+}
+
 // ========== LOAD XLSX ==========
 async function loadXLSX(){
+  // Thử load từ localStorage trước
+  const hasApi=loadApiBanksFromLS();
+  const hasAccounts=loadFromLS();
+  if(hasApi&&hasAccounts){
+    document.getElementById("loading-overlay").classList.add("hidden");
+    document.getElementById("export-btn").style.display="";
+    showToast("✅ Đã khôi phục dữ liệu từ bộ nhớ cục bộ");
+    // Vẫn fetch xlsx ngầm để cập nhật workbook cho export
+    fetchWorkbookSilent();
+    return;
+  }
+  // Lần đầu hoặc LS trống → fetch file xlsx
+  await fetchWorkbookFull();
+}
+
+async function fetchWorkbookFull(){
   try{
     const ab=await(await fetch("VietQR.xlsx")).arrayBuffer();
     workbook=XLSX.read(ab,{type:"array"});
 
     // Load API-io
-    const apiName=workbook.SheetNames.find(n=>n.includes("API"));
+    const apiName=workbook.SheetNames.find(n=>n.toLowerCase().includes("api"));
     if(apiName){
       API_BANKS=XLSX.utils.sheet_to_json(workbook.Sheets[apiName],{defval:""});
       API_BANKS.forEach(r=>{
@@ -437,16 +511,25 @@ async function loadXLSX(){
           id:r["data__id"],
         };
       });
+      saveApiBanksToLS();
     }
 
     // Load List_bank
     reloadListBank();
+    saveToLS();
     document.getElementById("loading-overlay").classList.add("hidden");
     document.getElementById("export-btn").style.display="";
   }catch(e){
     document.getElementById("loading-overlay").querySelector("p").textContent=
       "❌ "+e.message+" — đặt VietQR.xlsx cùng thư mục";
   }
+}
+
+async function fetchWorkbookSilent(){
+  try{
+    const ab=await(await fetch("VietQR.xlsx")).arrayBuffer();
+    workbook=XLSX.read(ab,{type:"array"});
+  }catch(e){/* silent */}
 }
 
 function reloadListBank(){
@@ -832,6 +915,7 @@ function writeBackToWorkbook(){
   const ws=XLSX.utils.aoa_to_sheet(rows);
   workbook.Sheets[listName]=ws;
   document.getElementById("export-btn").style.display="";
+  saveToLS(); // persist changes qua F5
 }
 
 function exportXLSX(){
@@ -839,6 +923,17 @@ function exportXLSX(){
   XLSX.writeFile(workbook,"VietQR.xlsx");
   document.getElementById("download-bar").classList.remove("hidden");
   showToast("⬇ Đã xuất VietQR.xlsx");
+}
+
+// ========== CLEAR LOCAL STORAGE ==========
+function clearLS(){
+  if(!confirm("Xoá toàn bộ dữ liệu đã lưu cục bộ và tải lại từ VietQR.xlsx?")) return;
+  localStorage.removeItem(LS_KEY_ACCOUNTS);
+  localStorage.removeItem(LS_KEY_API);
+  ACCOUNTS=[];BANK_MAP={};API_BANKS=[];workbook=null;
+  document.getElementById("loading-overlay").classList.remove("hidden");
+  document.getElementById("loading-overlay").querySelector("p").textContent="Đang đọc VietQR.xlsx…";
+  fetchWorkbookFull();
 }
 
 // ========== TAB SWITCH ==========
