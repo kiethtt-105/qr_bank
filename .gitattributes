@@ -1,2 +1,11 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Không commit file cũ có chứa token
+# config.js an toàn (không có token) đã được thay thế - vẫn commit được
+
+# Môi trường local
+.env
+.env.local
+.vercel
+
+# Editor
+.DS_Store
+*.swp
