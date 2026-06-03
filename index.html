@@ -12,6 +12,8 @@
       --accent:#3b5bdb;--accent-l:#eef1ff;--accent-d:#2c47c5;
       --text:#1a2035;--sub:#6b7280;
       --green:#2e7d32;--green-l:#e8f5e9;
+      --red:#c62828;--red-l:#ffebee;
+      --orange:#e65100;--orange-l:#fff3e0;
       --radius:10px;--shadow:0 2px 16px rgba(0,0,0,.08);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -30,7 +32,19 @@
     .from-file{margin-left:auto;font-size:.75rem;color:var(--sub);display:flex;align-items:center;gap:5px}
     .from-file span{color:var(--accent);font-weight:500}
 
-    .layout{display:grid;grid-template-columns:360px 1fr;height:calc(100vh - 54px);overflow:hidden}
+    /* Tab bar */
+    .tab-bar{display:flex;align-items:center;gap:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;flex-shrink:0}
+    .tab-btn{padding:10px 18px;font-size:.82rem;font-weight:600;color:var(--sub);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:all .15s;font-family:inherit}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .tab-btn:hover:not(.active){color:var(--text)}
+
+    /* Main tab panels */
+    #tab-qr{display:flex;flex:1;overflow:hidden}
+    #tab-manage{display:none;flex:1;flex-direction:column;overflow:hidden}
+    #tab-qr.show{display:flex}
+    #tab-manage.show{display:flex}
+
+    .layout{display:grid;grid-template-columns:360px 1fr;height:calc(100vh - 100px);overflow:hidden;flex:1}
 
     .left{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
     .left-body{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:16px}
@@ -75,15 +89,12 @@
     .right{display:flex;align-items:center;justify-content:center;padding:28px;background:var(--bg);position:relative;overflow-y:auto}
 
     .qr-shell{background:var(--surface);border-radius:16px;box-shadow:0 4px 24px rgba(59,91,219,.10),0 1px 4px rgba(0,0,0,.06);overflow:hidden;width:320px;display:flex;flex-direction:column}
-
     .qr-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface)}
     .qr-header img{width:30px;height:30px;object-fit:contain;border-radius:5px;border:1px solid var(--border);padding:2px;background:#fff;flex-shrink:0}
     .qh-name{font-size:.85rem;font-weight:600}
     .qh-stk{font-size:.72rem;color:var(--sub);font-family:'DM Mono',monospace;margin-top:1px}
     .qh-amount{margin-left:auto;background:var(--green-l);color:var(--green);font-size:.77rem;font-weight:600;padding:2px 9px;border-radius:20px;white-space:nowrap}
-
     .qr-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 20px 16px;gap:14px}
-
     .qr-wrap{position:relative;width:260px;height:260px}
     #qr-img{width:260px;height:260px;object-fit:contain;border-radius:8px;border:1px solid var(--border);display:none;transition:opacity .2s}
     #qr-img.visible{display:block;opacity:1}
@@ -92,7 +103,6 @@
     .qr-loading{position:absolute;inset:0;background:rgba(244,246,251,.85);border-radius:8px;display:none;align-items:center;justify-content:center}
     .qr-loading.show{display:flex}
     .spin-sm{width:22px;height:22px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .65s linear infinite}
-
     .link-row{width:100%;display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 10px}
     .link-url{font-size:.68rem;color:var(--sub);font-family:'DM Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .lbtn{flex-shrink:0;padding:4px 9px;font-size:.71rem;font-weight:500;border:none;border-radius:5px;cursor:pointer;transition:background .13s;font-family:inherit}
@@ -101,20 +111,81 @@
     .lbtn.copy:hover{background:#dde4fc}
     .lbtn.open:hover{background:var(--accent-d)}
     .lbtn.copied{background:var(--green-l);color:var(--green)}
-
     .refresh-btn{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sub);transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.06)}
     .refresh-btn:hover{border-color:var(--accent);color:var(--accent);transform:rotate(20deg)}
     .refresh-btn.spinning svg{animation:spin .5s linear}
-
     .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:24px 0}
     .empty-state .icon{font-size:2.8rem;opacity:.2}
     .empty-state p{font-size:.82rem;color:var(--sub);line-height:1.5}
+
+    /* ===== MANAGE TAB ===== */
+    .manage-toolbar{display:flex;align-items:center;gap:10px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+    .manage-toolbar input{flex:1;max-width:260px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;outline:none;background:var(--bg)}
+    .manage-toolbar input:focus{border-color:var(--accent);background:#fff}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-family:inherit;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .14s}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:var(--accent-d)}
+    .btn-success{background:var(--green);color:#fff}
+    .btn-success:hover{background:#1b5e20}
+    .btn-danger{background:var(--red);color:#fff}
+    .btn-danger:hover{background:#b71c1c}
+    .btn-ghost{background:var(--bg);color:var(--text);border:1.5px solid var(--border)}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-sm{padding:5px 10px;font-size:.75rem}
+    .btn-icon{padding:5px 8px;border-radius:6px;font-size:.8rem}
+
+    .manage-content{flex:1;overflow:auto;padding:20px}
+    .accounts-table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+    .accounts-table th{background:var(--bg);font-size:.72rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+    .accounts-table td{padding:10px 14px;font-size:.84rem;border-bottom:1px solid var(--border);vertical-align:middle}
+    .accounts-table tr:last-child td{border-bottom:none}
+    .accounts-table tr:hover td{background:#fafbff}
+    .td-bank{display:flex;align-items:center;gap:9px}
+    .td-bank img{width:26px;height:26px;object-fit:contain;border-radius:4px;border:1px solid var(--border);background:#fff;padding:2px;flex-shrink:0}
+    .td-mono{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--sub)}
+    .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:.7rem;font-weight:600}
+    .tag-blue{background:var(--accent-l);color:var(--accent)}
+    .actions-cell{display:flex;gap:6px;align-items:center}
+
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+    .modal-backdrop.hidden{display:none}
+    .modal{background:var(--surface);border-radius:14px;padding:28px;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:20px}
+    .modal-title{font-size:1.05rem;font-weight:700}
+    .modal-fields{display:flex;flex-direction:column;gap:14px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+
+    /* Bank lookup dropdown */
+    .lookup-wrap{position:relative}
+    .lookup-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;box-shadow:var(--shadow);max-height:200px;overflow-y:auto;z-index:10;display:none}
+    .lookup-results.show{display:block}
+    .lookup-item{display:flex;align-items:center;gap:9px;padding:8px 12px;cursor:pointer;transition:background .12s;font-size:.84rem}
+    .lookup-item:hover{background:var(--accent-l)}
+    .lookup-item img{width:24px;height:24px;object-fit:contain;border-radius:4px;border:1px solid var(--border);background:#fff;padding:2px;flex-shrink:0}
+    .lookup-item .li-code{font-weight:600}
+    .lookup-item .li-name{font-size:.73rem;color:var(--sub)}
+    .lookup-item .li-bin{font-size:.7rem;font-family:'DM Mono',monospace;color:var(--accent);margin-left:auto}
+
+    /* Validation hint */
+    .field-hint{font-size:.7rem;margin-top:3px}
+    .field-hint.ok{color:var(--green)}
+    .field-hint.err{color:var(--red)}
+    .field-hint.warn{color:var(--orange)}
+
+    /* Toast */
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a2035;color:#fff;padding:10px 22px;border-radius:10px;font-size:.83rem;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:500}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* Download bar */
+    .download-bar{background:var(--accent-l);border-top:1px solid #c5cef8;padding:10px 20px;display:flex;align-items:center;gap:12px;font-size:.82rem;color:var(--accent);font-weight:500;flex-shrink:0}
+    .download-bar.hidden{display:none}
 
     @media(max-width:720px){
       .layout{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;overflow:visible}
       .left{height:auto;overflow:visible;border-right:none;border-bottom:1px solid var(--border)}
       .left-body{overflow:visible}
       .right{min-height:400px}
+      .manage-content{padding:12px}
     }
   </style>
 </head>
@@ -151,144 +222,262 @@
   <div class="from-file">📄 <span>VietQR.xlsx</span> · List_bank</div>
 </div>
 
-<div class="layout">
-  <div class="left">
-    <div class="left-body">
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('qr')" id="tbtn-qr">🏦 Tạo QR</button>
+  <button class="tab-btn" onclick="switchTab('manage')" id="tbtn-manage">⚙️ Quản lý tài khoản</button>
+</div>
 
-      <div>
-        <div class="section-label">Tài khoản</div>
-        <div id="selected-badge">
-          <img id="sel-logo" src="" alt="" />
-          <div>
-            <div class="sel-name" id="sel-name"></div>
-            <div class="sel-stk" id="sel-stk"></div>
-          </div>
-          <button class="change-btn" id="change-btn">Đổi</button>
-        </div>
-        <div id="bank-picker">
-          <input type="text" id="bank-search" placeholder="Tìm ngân hàng…" autocomplete="off" />
-          <div id="bank-list"></div>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-label">Chi tiết</div>
-        <div class="input-row">
-          <div class="field">
-            <label>Số tiền (VNĐ)</label>
-            <input type="number" id="amount" placeholder="VD: 25000" min="0" />
-          </div>
-          <div class="field">
-            <label>Template</label>
-            <select id="template-select">
-              <option value="compact2">Compact 2</option>
-              <option value="compact">Compact</option>
-              <option value="print">Print</option>
-              <option value="BdT8CDO" selected>BdT8CDO</option>
-              <option value="qr_only">QR Only</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Tên chủ tài khoản <span style="color:var(--accent);font-size:.68rem;font-weight:400">(từ file xlsx)</span></label>
-        <input type="text" id="account-name" placeholder="—" class="readonly-field" readonly />
-      </div>
-
-      <div class="field">
-        <label>Nội dung chuyển khoản</label>
-        <input type="text" id="memo" placeholder="VD: Thanh toan don hang" />
-      </div>
-
-    </div>
-  </div>
-
-  <div class="right">
-    <button class="refresh-btn" id="refresh-btn" title="Tải lại QR">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-      </svg>
-    </button>
-
-    <div class="qr-shell" id="qr-shell">
-      <div class="qr-header" id="qr-header" style="display:none">
-        <img id="qh-logo" src="" alt="" />
+<!-- TAB QR -->
+<div id="tab-qr" class="show">
+  <div class="layout">
+    <div class="left">
+      <div class="left-body">
         <div>
-          <div class="qh-name" id="qh-name"></div>
-          <div class="qh-stk" id="qh-stk"></div>
+          <div class="section-label">Tài khoản</div>
+          <div id="selected-badge">
+            <img id="sel-logo" src="" alt="" />
+            <div>
+              <div class="sel-name" id="sel-name"></div>
+              <div class="sel-stk" id="sel-stk"></div>
+            </div>
+            <button class="change-btn" id="change-btn">Đổi</button>
+          </div>
+          <div id="bank-picker">
+            <input type="text" id="bank-search" placeholder="Tìm ngân hàng…" autocomplete="off" />
+            <div id="bank-list"></div>
+          </div>
         </div>
-        <span class="qh-amount" id="qh-amount"></span>
+        <div>
+          <div class="section-label">Chi tiết</div>
+          <div class="input-row">
+            <div class="field">
+              <label>Số tiền (VNĐ)</label>
+              <input type="number" id="amount" placeholder="VD: 25000" min="0" />
+            </div>
+            <div class="field">
+              <label>Template</label>
+              <select id="template-select">
+                <option value="compact2">Compact 2</option>
+                <option value="compact">Compact</option>
+                <option value="print">Print</option>
+                <option value="BdT8CDO" selected>BdT8CDO</option>
+                <option value="qr_only">QR Only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Tên chủ tài khoản <span style="color:var(--accent);font-size:.68rem;font-weight:400">(từ file xlsx)</span></label>
+          <input type="text" id="account-name" placeholder="—" class="readonly-field" readonly />
+        </div>
+        <div class="field">
+          <label>Nội dung chuyển khoản</label>
+          <input type="text" id="memo" placeholder="VD: Thanh toan don hang" />
+        </div>
       </div>
-      <div class="qr-body">
-        <div class="empty-state" id="empty-state">
-          <div class="icon">🏦</div>
-          <p>Chọn tài khoản<br>để tạo mã QR</p>
+    </div>
+    <div class="right">
+      <button class="refresh-btn" id="refresh-btn" title="Tải lại QR">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+      </button>
+      <div class="qr-shell" id="qr-shell">
+        <div class="qr-header" id="qr-header" style="display:none">
+          <img id="qh-logo" src="" alt="" />
+          <div>
+            <div class="qh-name" id="qh-name"></div>
+            <div class="qh-stk" id="qh-stk"></div>
+          </div>
+          <span class="qh-amount" id="qh-amount"></span>
         </div>
-        <div class="qr-wrap" id="qr-wrap" style="display:none">
-          <img id="qr-img" src="" alt="QR" />
-          <div class="qr-loading" id="qr-loading"><div class="spin-sm"></div></div>
-        </div>
-        <div class="link-row" id="link-row" style="display:none">
-          <span class="link-url" id="link-url"></span>
-          <button class="lbtn copy" id="copy-btn">Copy</button>
-          <button class="lbtn open" id="open-btn">Mở ↗</button>
+        <div class="qr-body">
+          <div class="empty-state" id="empty-state">
+            <div class="icon">🏦</div>
+            <p>Chọn tài khoản<br>để tạo mã QR</p>
+          </div>
+          <div class="qr-wrap" id="qr-wrap" style="display:none">
+            <img id="qr-img" src="" alt="QR" />
+            <div class="qr-loading" id="qr-loading"><div class="spin-sm"></div></div>
+          </div>
+          <div class="link-row" id="link-row" style="display:none">
+            <span class="link-url" id="link-url"></span>
+            <button class="lbtn copy" id="copy-btn">Copy</button>
+            <button class="lbtn open" id="open-btn">Mở ↗</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<script>
-let ACCOUNTS=[],BANK_MAP={},selected=null,debounceTimer=null,currentUrl="";
+<!-- TAB MANAGE -->
+<div id="tab-manage">
+  <div class="manage-toolbar">
+    <input type="text" id="manage-search" placeholder="🔍 Tìm theo tên, STK, ngân hàng…" oninput="renderManageTable()" />
+    <button class="btn btn-primary" onclick="openAddModal()">＋ Thêm tài khoản</button>
+    <button class="btn btn-success" id="export-btn" onclick="exportXLSX()" style="display:none">⬇ Xuất Excel</button>
+    <span id="manage-count" style="font-size:.78rem;color:var(--sub);margin-left:auto"></span>
+  </div>
+  <div class="manage-content">
+    <table class="accounts-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Ngân hàng</th>
+          <th>STK (data_num)</th>
+          <th>Nhãn (list_name)</th>
+          <th>Chủ TK (name_ac)</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody id="manage-tbody"></tbody>
+    </table>
+  </div>
+  <div class="download-bar hidden" id="download-bar">
+    ✅ File đã được xuất. Mở lại trang và chọn file mới để cập nhật dữ liệu.
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('download-bar').classList.add('hidden')">Đóng</button>
+  </div>
+</div>
 
+<!-- ADD/EDIT MODAL -->
+<div class="modal-backdrop hidden" id="modal-backdrop">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Thêm tài khoản</div>
+    <div class="modal-fields">
+      <!-- Lookup ngân hàng từ API-io -->
+      <div class="field">
+        <label>Ngân hàng <span style="color:var(--red);font-size:.75rem">* (dò từ sheet API-io)</span></label>
+        <div class="lookup-wrap">
+          <input type="text" id="f-bank-search" placeholder="Gõ tên hoặc mã ngân hàng…" autocomplete="off" oninput="filterBankLookup(this.value)" />
+          <div class="lookup-results" id="bank-lookup-results"></div>
+        </div>
+        <div class="field-hint" id="hint-bank"></div>
+      </div>
+      <!-- Chỉ 3 trường nhập tay -->
+      <div class="input-row">
+        <div class="field">
+          <label>data__id</label>
+          <input type="number" id="f-id" placeholder="VD: 38" class="readonly-field" readonly />
+          <div class="field-hint" id="hint-id" style="color:var(--sub);font-size:.68rem">Tự điền khi chọn ngân hàng</div>
+        </div>
+        <div class="field">
+          <label>list_name <span style="color:var(--red)">*</span></label>
+          <input type="text" id="f-listname" placeholder="VD: TCB" oninput="validateListName()" />
+          <div class="field-hint" id="hint-listname"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>data_num — Số tài khoản <span style="color:var(--red)">*</span></label>
+        <input type="text" id="f-datanum" placeholder="VD: 44699999999" oninput="validateDataNum()" />
+        <div class="field-hint" id="hint-datanum"></div>
+      </div>
+      <div class="field">
+        <label>name_ac — Tên chủ tài khoản <span style="color:var(--red)">*</span></label>
+        <input type="text" id="f-nameac" placeholder="VD: Nguyen Van A" oninput="validateNameAc()" />
+        <div class="field-hint" id="hint-nameac"></div>
+      </div>
+      <!-- Preview vlookup (readonly) -->
+      <details style="font-size:.8rem;color:var(--sub)">
+        <summary style="cursor:pointer;font-weight:600;color:var(--text);padding:4px 0">👁 Xem trước VLOOKUP từ API-io</summary>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;background:var(--bg);border-radius:8px;padding:12px">
+          <div style="display:flex;gap:8px"><span style="width:110px;flex-shrink:0">data__name:</span><span id="pv-name" style="color:var(--text);font-weight:500">—</span></div>
+          <div style="display:flex;gap:8px"><span style="width:110px;flex-shrink:0">data__code:</span><span id="pv-code" style="color:var(--text);font-weight:500">—</span></div>
+          <div style="display:flex;gap:8px"><span style="width:110px;flex-shrink:0">data__bin:</span><span id="pv-bin" style="font-family:'DM Mono',monospace;color:var(--accent);font-weight:500">—</span></div>
+          <div style="display:flex;gap:8px"><span style="width:110px;flex-shrink:0">data__shortName:</span><span id="pv-short" style="color:var(--text);font-weight:500">—</span></div>
+          <div style="display:flex;gap:8px"><span style="width:110px;flex-shrink:0">data__logo:</span><span id="pv-logo-url" style="color:var(--sub);font-size:.7rem;word-break:break-all">—</span></div>
+        </div>
+      </details>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Huỷ</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveModal()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-backdrop hidden" id="confirm-backdrop">
+  <div class="modal" style="max-width:360px;gap:16px">
+    <div class="modal-title" style="color:var(--red)">🗑 Xác nhận xoá</div>
+    <p style="font-size:.88rem;color:var(--sub);line-height:1.6" id="confirm-msg"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Huỷ</button>
+      <button class="btn btn-danger" id="confirm-ok-btn">Xoá</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let ACCOUNTS=[], BANK_MAP={}, API_BANKS=[], selected=null, debounceTimer=null, currentUrl="";
+let editIndex=-1; // -1 = add mode, >=0 = edit mode
+let selectedApiBank=null; // ngân hàng đang chọn trong modal
+let workbook=null; // giữ lại workbook gốc để xuất
+
+// ========== LOAD XLSX ==========
 async function loadXLSX(){
   try{
     const ab=await(await fetch("VietQR.xlsx")).arrayBuffer();
-    const wb=XLSX.read(ab,{type:"array"});
+    workbook=XLSX.read(ab,{type:"array"});
 
-    const apiName=wb.SheetNames.find(n=>n.includes("API"));
+    // Load API-io
+    const apiName=workbook.SheetNames.find(n=>n.includes("API"));
     if(apiName){
-      XLSX.utils.sheet_to_json(wb.Sheets[apiName],{defval:""}).forEach(r=>{
+      API_BANKS=XLSX.utils.sheet_to_json(workbook.Sheets[apiName],{defval:""});
+      API_BANKS.forEach(r=>{
         const bin=String(r["data__bin"]||"").trim();
         if(bin) BANK_MAP[bin]={
           logo:String(r["data__logo"]||""),
           shortName:String(r["data__shortName"]||r["data__short_name"]||""),
+          name:String(r["data__name"]||""),
+          code:String(r["data__code"]||""),
+          id:r["data__id"],
         };
       });
     }
 
-    const listName=wb.SheetNames.find(n=>n.toLowerCase().includes("list"));
-    const rows=XLSX.utils.sheet_to_json(wb.Sheets[listName],{defval:""});
-
-    ACCOUNTS=rows
-      .filter(r=>r["data__bin"]&&r["data_num"]&&String(r["data__bin"]).trim()!=="-")
-      .map(r=>{
-        const bin=String(r["data__bin"]).trim();
-        const info=BANK_MAP[bin]||{};
-        let stk=String(r["data_num"]||"").trim();
-        if(/e/i.test(stk)) stk=Number(r["data_num"]).toFixed(0);
-        return{
-          label:String(r["list_name"]||r["data__code"]||""),
-          stk,bin,
-          name:String(r["data__name"]||""),
-          code:String(r["data__code"]||""),
-          shortName:String(r["data__shortName"]||info.shortName||""),
-          logo:String(r["data__logo"]||info.logo||""),
-          nameAc:String(r["name_ac"]||""),
-        };
-      });
-
-    document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
-    renderCards(ACCOUNTS);
+    // Load List_bank
+    reloadListBank();
     document.getElementById("loading-overlay").classList.add("hidden");
+    document.getElementById("export-btn").style.display="";
   }catch(e){
     document.getElementById("loading-overlay").querySelector("p").textContent=
       "❌ "+e.message+" — đặt VietQR.xlsx cùng thư mục";
   }
 }
 
+function reloadListBank(){
+  const listName=workbook.SheetNames.find(n=>n.toLowerCase().includes("list"));
+  const rows=XLSX.utils.sheet_to_json(workbook.Sheets[listName],{defval:""});
+  ACCOUNTS=rows
+    .filter(r=>r["data__bin"]&&r["data_num"]&&String(r["data__bin"]).trim()!=="-")
+    .map(r=>{
+      const bin=String(r["data__bin"]).trim();
+      const info=BANK_MAP[bin]||{};
+      let stk=String(r["data_num"]||"").trim();
+      if(/e/i.test(stk)) stk=Number(r["data_num"]).toFixed(0);
+      return{
+        label:String(r["list_name"]||r["data__code"]||""),
+        stk,bin,
+        name:String(r["data__name"]||info.name||""),
+        code:String(r["data__code"]||info.code||""),
+        shortName:String(r["data__shortName"]||info.shortName||""),
+        logo:String(r["data__logo"]||info.logo||""),
+        nameAc:String(r["name_ac"]||""),
+        dataId:r["data__id"],
+        listName:String(r["list_name"]||""),
+        datanum:stk,
+      };
+    });
+  document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
+  renderCards(ACCOUNTS);
+  renderManageTable();
+}
+
+// ========== QR TAB ==========
 function renderCards(list){
   const el=document.getElementById("bank-list");
   el.innerHTML="";
@@ -310,7 +499,7 @@ function renderCards(list){
 
 function selectAccount(acc){
   selected=acc;
-  currentUrl=""; // reset cache khi chọn tài khoản mới
+  currentUrl="";
   document.getElementById("bank-picker").style.display="none";
   const badge=document.getElementById("selected-badge");
   badge.classList.add("show");
@@ -318,7 +507,7 @@ function selectAccount(acc){
   document.getElementById("sel-name").textContent=`${acc.label} – ${acc.shortName}`;
   document.getElementById("sel-stk").textContent=`STK: ${acc.stk}`;
   document.getElementById("account-name").value=acc.nameAc||"";
-  generateQR(); // tạo ngay lập tức
+  generateQR();
 }
 
 document.getElementById("change-btn").addEventListener("click",()=>{
@@ -338,20 +527,12 @@ document.getElementById("bank-search").addEventListener("input",function(){
   ));
 });
 
-// Trigger ngay khi thay đổi — không delay
-// Text fields: debounce 120ms (chỉ để tránh flood khi paste)
-function scheduleQR(delay=120){
-  clearTimeout(debounceTimer);
-  debounceTimer=setTimeout(generateQR, delay);
-}
-
+function scheduleQR(delay=120){clearTimeout(debounceTimer);debounceTimer=setTimeout(generateQR,delay);}
 ["amount","memo"].forEach(id=>{
   document.getElementById(id).addEventListener("input",()=>{if(selected)scheduleQR(120);});
   document.getElementById(id).addEventListener("keydown",e=>{if(e.key==="Enter"&&selected){clearTimeout(debounceTimer);generateQR();}});
 });
-document.getElementById("template-select").addEventListener("change",()=>{
-  if(selected){currentUrl="";generateQR();}
-});
+document.getElementById("template-select").addEventListener("change",()=>{if(selected){currentUrl="";generateQR();}});
 
 function generateQR(){
   if(!selected)return;
@@ -359,48 +540,34 @@ function generateQR(){
   const template=document.getElementById("template-select").value||"BdT8CDO";
   const memo=document.getElementById("memo").value.trim();
   const accName=selected.nameAc||selected.shortName||selected.label;
-
   let url=`https://img.vietqr.io/image/${selected.bin}-${selected.stk}-${template}.png`;
   const p=[];
   if(amount) p.push(`amount=${encodeURIComponent(amount)}`);
   if(memo)   p.push(`addInfo=${encodeURIComponent(memo)}`);
   if(accName)p.push(`accountName=${encodeURIComponent(accName)}`);
   if(p.length) url+="?"+p.join("&");
-
   if(url===currentUrl)return;
   currentUrl=url;
-
   document.getElementById("qr-header").style.display="flex";
   document.getElementById("qh-logo").src=selected.logo;
   document.getElementById("qh-name").textContent=`${selected.label} – ${selected.shortName}`;
   document.getElementById("qh-stk").textContent=`STK: ${selected.stk}`;
   document.getElementById("qh-amount").textContent=amount?Number(amount).toLocaleString("vi-VN")+" ₫":"";
-
   document.getElementById("empty-state").style.display="none";
   document.getElementById("qr-wrap").style.display="block";
   document.getElementById("link-row").style.display="flex";
-
   const qrImg=document.getElementById("qr-img");
   const loading=document.getElementById("qr-loading");
   loading.classList.add("show");
   qrImg.classList.remove("visible");
-
-  // vietqr.io block fetch (CORS), phải dùng Image()
-  // Cancel request cũ bằng cách đánh dấu version — chỉ request mới nhất được hiển thị
   const reqId=++generateQR._reqId;
   const img=new Image();
   img.onload=()=>{
-    if(reqId!==generateQR._reqId)return; // request cũ, bỏ qua
-    qrImg.src=url;
-    qrImg.classList.add("visible");
-    loading.classList.remove("show");
-  };
-  img.onerror=()=>{
     if(reqId!==generateQR._reqId)return;
-    loading.classList.remove("show");
+    qrImg.src=url;qrImg.classList.add("visible");loading.classList.remove("show");
   };
+  img.onerror=()=>{if(reqId!==generateQR._reqId)return;loading.classList.remove("show");};
   img.src=url;
-
   document.getElementById("link-url").textContent=url;
   const copyBtn=document.getElementById("copy-btn");
   copyBtn.textContent="Copy";copyBtn.classList.remove("copied");
@@ -413,13 +580,291 @@ function generateQR(){
 generateQR._reqId=0;
 
 document.getElementById("refresh-btn").addEventListener("click",()=>{
-  if(!selected)return;
-  currentUrl="";
+  if(!selected)return;currentUrl="";
   const btn=document.getElementById("refresh-btn");
   btn.classList.add("spinning");
   setTimeout(()=>btn.classList.remove("spinning"),500);
   generateQR();
 });
+
+// ========== MANAGE TAB ==========
+function renderManageTable(){
+  const q=(document.getElementById("manage-search")||{value:""}).value.toLowerCase().trim();
+  const filtered=!q?ACCOUNTS:ACCOUNTS.filter(a=>
+    a.label.toLowerCase().includes(q)||a.stk.includes(q)||
+    a.shortName.toLowerCase().includes(q)||a.nameAc.toLowerCase().includes(q)||
+    a.code.toLowerCase().includes(q)
+  );
+  document.getElementById("manage-count").textContent=filtered.length+" / "+ACCOUNTS.length+" tài khoản";
+  const tbody=document.getElementById("manage-tbody");
+  tbody.innerHTML="";
+  filtered.forEach((acc,fi)=>{
+    const realIdx=ACCOUNTS.indexOf(acc);
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td><span class="td-mono">${acc.dataId||"—"}</span></td>
+      <td>
+        <div class="td-bank">
+          <img src="${acc.logo}" alt="" onerror="this.style.display='none'" />
+          <div>
+            <div style="font-weight:600;font-size:.84rem">${acc.shortName||acc.code}</div>
+            <div class="td-mono" style="font-size:.7rem">${acc.code} · BIN ${acc.bin}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="td-mono">${acc.stk}</span></td>
+      <td><span class="tag tag-blue">${acc.label}</span></td>
+      <td>${acc.nameAc||"<span style='color:var(--sub)'>—</span>"}</td>
+      <td>
+        <div class="actions-cell">
+          <button class="btn btn-ghost btn-sm btn-icon" title="Sửa" onclick="openEditModal(${realIdx})">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" title="Xoá" onclick="confirmDelete(${realIdx})">🗑</button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ========== MODAL ADD/EDIT ==========
+function openAddModal(){
+  editIndex=-1;selectedApiBank=null;
+  document.getElementById("modal-title").textContent="➕ Thêm tài khoản";
+  document.getElementById("modal-save-btn").textContent="Thêm";
+  document.getElementById("f-bank-search").value="";
+  document.getElementById("f-id").value="";
+  document.getElementById("f-listname").value="";
+  document.getElementById("f-datanum").value="";
+  document.getElementById("f-nameac").value="";
+  clearHints();clearPreview();
+  document.getElementById("bank-lookup-results").classList.remove("show");
+  document.getElementById("modal-backdrop").classList.remove("hidden");
+}
+
+function openEditModal(idx){
+  editIndex=idx;
+  const acc=ACCOUNTS[idx];
+  // find matching bank in API_BANKS
+  selectedApiBank=API_BANKS.find(b=>String(b["data__bin"]).trim()===acc.bin)||null;
+  document.getElementById("modal-title").textContent="✏️ Sửa tài khoản";
+  document.getElementById("modal-save-btn").textContent="Cập nhật";
+  document.getElementById("f-bank-search").value=selectedApiBank?(selectedApiBank["data__shortName"]||selectedApiBank["data__code"]||""):"";
+  document.getElementById("f-id").value=acc.dataId||"";
+  document.getElementById("f-listname").value=acc.label||"";
+  document.getElementById("f-datanum").value=acc.stk||"";
+  document.getElementById("f-nameac").value=acc.nameAc||"";
+  clearHints();
+  if(selectedApiBank) updatePreview(selectedApiBank);
+  document.getElementById("bank-lookup-results").classList.remove("show");
+  document.getElementById("modal-backdrop").classList.remove("hidden");
+}
+
+function closeModal(){document.getElementById("modal-backdrop").classList.add("hidden");}
+
+// Dò ngân hàng từ API-io
+function filterBankLookup(q){
+  const res=document.getElementById("bank-lookup-results");
+  const term=q.toLowerCase().trim();
+  if(!term){res.classList.remove("show");return;}
+  const matches=API_BANKS.filter(b=>{
+    const code=String(b["data__code"]||"").toLowerCase();
+    const name=String(b["data__name"]||"").toLowerCase();
+    const short=String(b["data__shortName"]||b["data__short_name"]||"").toLowerCase();
+    const bin=String(b["data__bin"]||"");
+    return code.includes(term)||name.includes(term)||short.includes(term)||bin.includes(term);
+  }).slice(0,10);
+  if(!matches.length){res.innerHTML='<div class="lookup-item" style="color:var(--sub)">Không tìm thấy ngân hàng</div>';res.classList.add("show");return;}
+  res.innerHTML=matches.map(b=>`
+    <div class="lookup-item" onclick="selectApiBank(${b['data__id']})">
+      <img src="${b['data__logo']||''}" alt="" onerror="this.style.display='none'" />
+      <div>
+        <div class="li-code">${b['data__shortName']||b['data__code']}</div>
+        <div class="li-name">${b['data__name']||''}</div>
+      </div>
+      <div class="li-bin">BIN ${b['data__bin']}</div>
+    </div>`).join("");
+  res.classList.add("show");
+}
+
+function selectApiBank(id){
+  selectedApiBank=API_BANKS.find(b=>b["data__id"]==id)||null;
+  if(!selectedApiBank)return;
+  document.getElementById("f-bank-search").value=selectedApiBank["data__shortName"]||selectedApiBank["data__code"]||"";
+  document.getElementById("f-id").value=selectedApiBank["data__id"]||"";
+  document.getElementById("bank-lookup-results").classList.remove("show");
+  document.getElementById("hint-bank").className="field-hint ok";
+  document.getElementById("hint-bank").textContent="✓ "+selectedApiBank["data__name"];
+  updatePreview(selectedApiBank);
+}
+
+function updatePreview(b){
+  document.getElementById("pv-name").textContent=b["data__name"]||"—";
+  document.getElementById("pv-code").textContent=b["data__code"]||"—";
+  document.getElementById("pv-bin").textContent=b["data__bin"]||"—";
+  document.getElementById("pv-short").textContent=b["data__shortName"]||b["data__short_name"]||"—";
+  document.getElementById("pv-logo-url").textContent=b["data__logo"]||"—";
+}
+
+function clearPreview(){
+  ["pv-name","pv-code","pv-bin","pv-short","pv-logo-url"].forEach(id=>document.getElementById(id).textContent="—");
+}
+
+function clearHints(){
+  ["hint-bank","hint-id","hint-listname","hint-datanum","hint-nameac"].forEach(id=>{
+    const el=document.getElementById(id);
+    el.textContent="";el.className="field-hint";
+  });
+}
+
+// Validation
+function validateDataNum(){
+  const v=document.getElementById("f-datanum").value.trim();
+  const h=document.getElementById("hint-datanum");
+  if(!v){h.className="field-hint err";h.textContent="⚠ Số tài khoản không được để trống";return false;}
+  if(!/^\d{6,20}$/.test(v)){h.className="field-hint warn";h.textContent="⚠ STK thường là 6-20 chữ số";}
+  else{h.className="field-hint ok";h.textContent="✓ Hợp lệ";}
+  // Kiểm tra trùng STK (ngoại trừ khi edit chính nó)
+  const dup=ACCOUNTS.some((a,i)=>a.stk===v&&i!==editIndex);
+  if(dup){h.className="field-hint err";h.textContent="❌ STK này đã tồn tại trong danh sách";return false;}
+  return true;
+}
+
+function validateListName(){
+  const v=document.getElementById("f-listname").value.trim();
+  const h=document.getElementById("hint-listname");
+  if(!v){h.className="field-hint err";h.textContent="⚠ Không được để trống";return false;}
+  h.className="field-hint ok";h.textContent="✓";return true;
+}
+
+function validateNameAc(){
+  const v=document.getElementById("f-nameac").value.trim();
+  const h=document.getElementById("hint-nameac");
+  if(!v){h.className="field-hint err";h.textContent="⚠ Không được để trống";return false;}
+  h.className="field-hint ok";h.textContent="✓";return true;
+}
+
+function saveModal(){
+  // Validate
+  if(!selectedApiBank){
+    document.getElementById("hint-bank").className="field-hint err";
+    document.getElementById("hint-bank").textContent="❌ Phải chọn ngân hàng từ danh sách API-io";
+    return;
+  }
+  const okNum=validateDataNum();
+  const okList=validateListName();
+  const okName=validateNameAc();
+  if(!okNum||!okList||!okName)return;
+
+  const bin=String(selectedApiBank["data__bin"]).trim();
+  const newEntry={
+    label:document.getElementById("f-listname").value.trim(),
+    stk:document.getElementById("f-datanum").value.trim(),
+    bin,
+    name:String(selectedApiBank["data__name"]||""),
+    code:String(selectedApiBank["data__code"]||""),
+    shortName:String(selectedApiBank["data__shortName"]||selectedApiBank["data__short_name"]||""),
+    logo:String(selectedApiBank["data__logo"]||""),
+    nameAc:document.getElementById("f-nameac").value.trim(),
+    dataId:selectedApiBank["data__id"],
+    listName:document.getElementById("f-listname").value.trim(),
+    datanum:document.getElementById("f-datanum").value.trim(),
+  };
+
+  if(editIndex>=0){
+    ACCOUNTS[editIndex]=newEntry;
+    showToast("✅ Đã cập nhật tài khoản");
+  }else{
+    ACCOUNTS.push(newEntry);
+    showToast("✅ Đã thêm tài khoản mới");
+  }
+
+  writeBackToWorkbook();
+  closeModal();
+  renderCards(ACCOUNTS);
+  renderManageTable();
+  document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
+}
+
+// ========== DELETE ==========
+let pendingDeleteIdx=-1;
+function confirmDelete(idx){
+  pendingDeleteIdx=idx;
+  const acc=ACCOUNTS[idx];
+  document.getElementById("confirm-msg").innerHTML=
+    `Bạn có chắc muốn xoá tài khoản <strong>${acc.label}</strong> — STK <code>${acc.stk}</code> (${acc.shortName})?<br><br>Thao tác không thể hoàn tác.`;
+  document.getElementById("confirm-backdrop").classList.remove("hidden");
+}
+function closeConfirm(){document.getElementById("confirm-backdrop").classList.add("hidden");pendingDeleteIdx=-1;}
+document.getElementById("confirm-ok-btn").addEventListener("click",()=>{
+  if(pendingDeleteIdx<0)return;
+  const acc=ACCOUNTS.splice(pendingDeleteIdx,1)[0];
+  writeBackToWorkbook();
+  renderCards(ACCOUNTS);
+  renderManageTable();
+  document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
+  showToast("🗑 Đã xoá: "+acc.label+" ("+acc.stk+")");
+  closeConfirm();
+});
+
+// ========== WRITE BACK + EXPORT ==========
+function writeBackToWorkbook(){
+  if(!workbook)return;
+  const listName=workbook.SheetNames.find(n=>n.toLowerCase().includes("list"));
+  // Rebuild sheet data — chỉ ghi 3 cột nhập tay + các cột vlookup là formula
+  // Giữ header row gốc, ghi đè data rows không có dòng trống
+  const headers=["data__id","list_name","data_num","name_ac","data__name","data__code","data__bin","data__shortName","data__logo","data__short_name"];
+  const rows=[headers];
+  ACCOUNTS.forEach(acc=>{
+    // 3 cột nhập tay: data_num, list_name (=label), name_ac
+    // Các cột còn lại lấy từ selectedApiBank (vlookup)
+    rows.push([
+      acc.dataId||"",
+      acc.label,
+      acc.stk,
+      acc.nameAc,
+      acc.name,
+      acc.code,
+      acc.bin,
+      acc.shortName,
+      acc.logo,
+      acc.shortName,
+    ]);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  workbook.Sheets[listName]=ws;
+  document.getElementById("export-btn").style.display="";
+}
+
+function exportXLSX(){
+  if(!workbook)return;
+  XLSX.writeFile(workbook,"VietQR.xlsx");
+  document.getElementById("download-bar").classList.remove("hidden");
+  showToast("⬇ Đã xuất VietQR.xlsx");
+}
+
+// ========== TAB SWITCH ==========
+function switchTab(tab){
+  document.getElementById("tab-qr").classList.toggle("show",tab==="qr");
+  document.getElementById("tab-manage").classList.toggle("show",tab==="manage");
+  document.getElementById("tbtn-qr").classList.toggle("active",tab==="qr");
+  document.getElementById("tbtn-manage").classList.toggle("active",tab==="manage");
+  if(tab==="manage")renderManageTable();
+}
+
+// ========== TOAST ==========
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2400);
+}
+
+// Close lookup on outside click
+document.addEventListener("click",e=>{
+  if(!e.target.closest(".lookup-wrap"))
+    document.getElementById("bank-lookup-results").classList.remove("show");
+});
+// Close modal on backdrop click
+document.getElementById("modal-backdrop").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
+document.getElementById("confirm-backdrop").addEventListener("click",e=>{if(e.target===e.currentTarget)closeConfirm();});
 
 loadXLSX();
 </script>
