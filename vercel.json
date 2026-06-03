@@ -1,6 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/VietQR.xlsx", "destination": "/api/serve" },
-    { "source": "/(.*)",        "destination": "/api/serve" }
-  ]
-}
