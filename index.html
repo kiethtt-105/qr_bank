@@ -241,7 +241,7 @@
 </div>
 
 <script>
-let ACCOUNTS=[],BANK_MAP={},selected=null,debounceTimer=null,currentUrl="";
+let ACCOUNTS=[],BANK_MAP={},selected=null,debounceTimer=null,currentUrl="",abortCtrl=null;
 
 async function loadXLSX(){
   try{
@@ -310,6 +310,7 @@ function renderCards(list){
 
 function selectAccount(acc){
   selected=acc;
+  currentUrl=""; // reset cache khi chọn tài khoản mới
   document.getElementById("bank-picker").style.display="none";
   const badge=document.getElementById("selected-badge");
   badge.classList.add("show");
@@ -317,7 +318,7 @@ function selectAccount(acc){
   document.getElementById("sel-name").textContent=`${acc.label} – ${acc.shortName}`;
   document.getElementById("sel-stk").textContent=`STK: ${acc.stk}`;
   document.getElementById("account-name").value=acc.nameAc||"";
-  generateQR();
+  generateQR(); // tạo ngay lập tức
 }
 
 document.getElementById("change-btn").addEventListener("click",()=>{
@@ -325,6 +326,7 @@ document.getElementById("change-btn").addEventListener("click",()=>{
   document.getElementById("bank-picker").style.display="block";
   document.getElementById("bank-search").value="";
   document.getElementById("account-name").value="";
+  currentUrl="";
   renderCards(ACCOUNTS);
 });
 
@@ -336,16 +338,19 @@ document.getElementById("bank-search").addEventListener("input",function(){
   ));
 });
 
-["amount","template-select","memo"].forEach(id=>{
-  const el=document.getElementById(id);
-  const evt=id==="template-select"?"change":"input";
-  el.addEventListener(evt,()=>{
-    if(!selected)return;
-    clearTimeout(debounceTimer);
-    if(id==="template-select"){generateQR();return;}
-    debounceTimer=setTimeout(generateQR,500);
-  });
-  if(evt==="input") el.addEventListener("keydown",e=>{if(e.key==="Enter"&&selected){clearTimeout(debounceTimer);generateQR();}});
+// Trigger ngay khi thay đổi — không delay
+// Text fields: debounce 120ms (chỉ để tránh flood khi paste)
+function scheduleQR(delay=120){
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(generateQR, delay);
+}
+
+["amount","memo"].forEach(id=>{
+  document.getElementById(id).addEventListener("input",()=>{if(selected)scheduleQR(120);});
+  document.getElementById(id).addEventListener("keydown",e=>{if(e.key==="Enter"&&selected){clearTimeout(debounceTimer);generateQR();}});
+});
+document.getElementById("template-select").addEventListener("change",()=>{
+  if(selected){currentUrl="";generateQR();}
 });
 
 function generateQR(){
@@ -365,6 +370,11 @@ function generateQR(){
   if(url===currentUrl)return;
   currentUrl=url;
 
+  // Abort request đang pending trước khi tạo cái mới
+  if(abortCtrl) abortCtrl.abort();
+  abortCtrl=new AbortController();
+  const signal=abortCtrl.signal;
+
   document.getElementById("qr-header").style.display="flex";
   document.getElementById("qh-logo").src=selected.logo;
   document.getElementById("qh-name").textContent=`${selected.label} – ${selected.shortName}`;
@@ -380,10 +390,26 @@ function generateQR(){
   loading.classList.add("show");
   qrImg.classList.remove("visible");
 
-  const img=new Image();
-  img.onload=()=>{qrImg.src=url;qrImg.classList.add("visible");loading.classList.remove("show");};
-  img.onerror=()=>{loading.classList.remove("show");};
-  img.src=url;
+  // Dùng fetch + AbortController để cancel được request cũ
+  fetch(url,{signal})
+    .then(r=>{
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      return r.blob();
+    })
+    .then(blob=>{
+      if(signal.aborted) return;
+      const objUrl=URL.createObjectURL(blob);
+      // revoke object URL cũ nếu có
+      if(qrImg._objUrl) URL.revokeObjectURL(qrImg._objUrl);
+      qrImg._objUrl=objUrl;
+      qrImg.src=objUrl;
+      qrImg.classList.add("visible");
+      loading.classList.remove("show");
+    })
+    .catch(err=>{
+      if(err.name==="AbortError") return; // bị cancel chủ động, bỏ qua
+      loading.classList.remove("show");
+    });
 
   document.getElementById("link-url").textContent=url;
   const copyBtn=document.getElementById("copy-btn");
