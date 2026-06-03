@@ -395,9 +395,15 @@
 
 <script>
 let ACCOUNTS=[], BANK_MAP={}, API_BANKS=[], selected=null, debounceTimer=null, currentUrl="";
+<<<<<<< HEAD
 let editIndex=-1;
 let selectedApiBank=null;
 let workbook=null;
+=======
+let editIndex=-1; // -1 = add mode, >=0 = edit mode
+let selectedApiBank=null; // ngân hàng đang chọn trong modal
+let workbook=null; // giữ lại workbook gốc để xuất
+>>>>>>> parent of 0a7fe97 (BN)
 
 // ========== LOAD XLSX ==========
 async function loadXLSX(){
@@ -405,7 +411,12 @@ async function loadXLSX(){
     const ab=await(await fetch("VietQR.xlsx")).arrayBuffer();
     workbook=XLSX.read(ab,{type:"array"});
 
+<<<<<<< HEAD
     const apiName=workbook.SheetNames.find(n=>n.toLowerCase().includes("api"));
+=======
+    // Load API-io
+    const apiName=workbook.SheetNames.find(n=>n.includes("API"));
+>>>>>>> parent of 0a7fe97 (BN)
     if(apiName){
       API_BANKS=XLSX.utils.sheet_to_json(workbook.Sheets[apiName],{defval:""});
       API_BANKS.forEach(r=>{
@@ -777,6 +788,45 @@ document.getElementById("confirm-ok-btn").addEventListener("click",()=>{
   closeConfirm();
 });
 
+<<<<<<< HEAD
+=======
+// ========== WRITE BACK + EXPORT ==========
+function writeBackToWorkbook(){
+  if(!workbook)return;
+  const listName=workbook.SheetNames.find(n=>n.toLowerCase().includes("list"));
+  // Rebuild sheet data — chỉ ghi 3 cột nhập tay + các cột vlookup là formula
+  // Giữ header row gốc, ghi đè data rows không có dòng trống
+  const headers=["data__id","list_name","data_num","name_ac","data__name","data__code","data__bin","data__shortName","data__logo","data__short_name"];
+  const rows=[headers];
+  ACCOUNTS.forEach(acc=>{
+    // 3 cột nhập tay: data_num, list_name (=label), name_ac
+    // Các cột còn lại lấy từ selectedApiBank (vlookup)
+    rows.push([
+      acc.dataId||"",
+      acc.label,
+      acc.stk,
+      acc.nameAc,
+      acc.name,
+      acc.code,
+      acc.bin,
+      acc.shortName,
+      acc.logo,
+      acc.shortName,
+    ]);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  workbook.Sheets[listName]=ws;
+  document.getElementById("export-btn").style.display="";
+}
+
+function exportXLSX(){
+  if(!workbook)return;
+  XLSX.writeFile(workbook,"VietQR.xlsx");
+  document.getElementById("download-bar").classList.remove("hidden");
+  showToast("⬇ Đã xuất VietQR.xlsx");
+}
+
+>>>>>>> parent of 0a7fe97 (BN)
 // ========== TAB SWITCH ==========
 function switchTab(tab){
   document.getElementById("tab-qr").classList.toggle("show",tab==="qr");
