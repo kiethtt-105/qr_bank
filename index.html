@@ -1,592 +1,610 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VietQR Generator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-  :root {
-    --red: #e8192c;
-    --red-dark: #b5101e;
-    --gold: #f5c842;
-    --bg: #0b0c0f;
-    --surface: #13151a;
-    --surface2: #1c1f28;
-    --surface3: #22263200;
-    --border: rgba(255,255,255,0.07);
-    --text: #f0f0f0;
-    --muted: #8a8d99;
-    --radius: 16px;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VietQR Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg:       #f7f8fc;
+      --surface:  #ffffff;
+      --border:   #e4e7f0;
+      --accent:   #3b5bdb;
+      --accent-l: #eef1ff;
+      --text:     #1c2333;
+      --sub:      #6b7280;
+      --green:    #2e7d32;
+      --green-l:  #e8f5e9;
+      --radius:   10px;
+      --shadow:   0 2px 14px rgba(0,0,0,0.07);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      display: flex; flex-direction: column;
+    }
 
-  body::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background: radial-gradient(ellipse 80% 50% at 50% -5%, rgba(232,25,44,0.18) 0%, transparent 65%);
-  }
+    /* ── Loading ── */
+    #loading-overlay {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px; z-index: 999;
+    }
+    #loading-overlay.hidden { display: none; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-  .container { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 0 20px 80px; }
+    /* ── Topbar ── */
+    .topbar {
+      height: 52px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px; gap: 10px;
+      flex-shrink: 0;
+    }
+    .topbar h1 { font-size: 1rem; font-weight: 600; }
+    .topbar .badge {
+      background: var(--accent-l); color: var(--accent);
+      font-size: 0.72rem; font-weight: 500;
+      padding: 2px 8px; border-radius: 20px; margin-left: 4px;
+      font-family: 'DM Mono', monospace;
+    }
+    .topbar .from-file {
+      margin-left: auto; font-size: 0.75rem; color: var(--sub);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .topbar .from-file span { color: var(--accent); font-weight: 500; }
 
-  /* HEADER */
-  header { text-align: center; padding: 52px 0 36px; }
-  .pill {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(232,25,44,0.1); border: 1px solid rgba(232,25,44,0.28);
-    border-radius: 999px; padding: 5px 16px; margin-bottom: 22px;
-    font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--red);
-  }
-  .pill-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: blink 2s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-  header h1 {
-    font-family: 'Playfair Display', serif; font-size: clamp(34px,5.5vw,58px);
-    background: linear-gradient(140deg,#fff 20%,var(--gold) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    line-height: 1.18; margin-bottom: 10px;
-  }
-  header p { color: var(--muted); font-size: 14px; }
+    /* ── Layout: 2 columns ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      height: calc(100vh - 52px);
+      overflow: hidden;
+    }
 
-  /* CARD */
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 22px; padding: 28px; margin-bottom: 20px;
-    position: relative; overflow: hidden;
-  }
-  .card::after {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(232,25,44,0.45) 50%, transparent 100%);
-  }
+    /* ── Left panel ── */
+    .left {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .left-body {
+      flex: 1; overflow-y: auto; padding: 20px 18px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
 
-  /* SECTION LABEL */
-  .slabel {
-    font-size: 10.5px; font-weight: 800; letter-spacing: 2.5px;
-    text-transform: uppercase; color: var(--red); margin-bottom: 18px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .slabel::after { content:''; flex:1; height:1px; background: linear-gradient(90deg,rgba(232,25,44,0.3),transparent); }
+    /* scrollbar */
+    .left-body::-webkit-scrollbar, #bank-list::-webkit-scrollbar { width: 4px; }
+    .left-body::-webkit-scrollbar-track, #bank-list::-webkit-scrollbar-track { background: transparent; }
+    .left-body::-webkit-scrollbar-thumb, #bank-list::-webkit-scrollbar-thumb {
+      background: var(--border); border-radius: 4px;
+    }
 
-  /* LOADING STATE */
-  #loadingState { text-align: center; padding: 60px 0; }
-  .load-spinner {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: 3px solid var(--surface2); border-top-color: var(--red);
-    animation: spin .8s linear infinite; margin: 0 auto 16px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #loadingState p { color: var(--muted); font-size: 14px; }
+    .section-label {
+      font-size: 0.7rem; font-weight: 600; color: var(--sub);
+      text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px;
+    }
 
-  /* ERROR STATE */
-  #errorState { display:none; text-align:center; padding: 40px; }
-  #errorState p { color: #ff6b6b; margin-bottom: 16px; font-size: 14px; }
-  .btn-retry {
-    padding: 10px 24px; border-radius: 10px;
-    background: var(--red); color: white; border: none;
-    font-family: inherit; font-weight: 600; font-size: 13px; cursor: pointer;
-  }
+    /* bank search + cards */
+    #bank-search {
+      width: 100%; padding: 9px 12px;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      font-family: inherit; font-size: 0.88rem; color: var(--text);
+      outline: none; transition: border-color .15s; margin-bottom: 8px;
+      background: var(--bg);
+    }
+    #bank-search:focus { border-color: var(--accent); background: #fff; }
 
-  /* MAIN CONTENT */
-  #mainContent { display:none; }
+    #bank-list {
+      display: flex; flex-direction: column; gap: 5px;
+      max-height: 220px; overflow-y: auto;
+    }
+    .bank-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 11px; border-radius: 8px;
+      border: 1.5px solid transparent;
+      cursor: pointer; background: var(--bg);
+      transition: all .14s;
+    }
+    .bank-card:hover { border-color: #c5cef8; background: var(--accent-l); }
+    .bank-card.active { border-color: var(--accent); background: var(--accent-l); }
+    .bank-card img {
+      width: 28px; height: 28px; object-fit: contain;
+      border-radius: 5px; flex-shrink: 0;
+      border: 1px solid var(--border); background: #fff; padding: 2px;
+    }
+    .bank-card .bc-name { font-size: 0.84rem; font-weight: 600; color: var(--text); }
+    .bank-card .bc-stk  {
+      font-size: 0.75rem; color: var(--sub); margin-top: 1px;
+      font-family: 'DM Mono', monospace;
+    }
+    .bank-card.active .bc-stk { color: var(--accent); }
+    .bank-card .check {
+      margin-left: auto; width: 18px; height: 18px;
+      background: var(--accent); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; opacity: 0; transition: opacity .15s;
+    }
+    .bank-card.active .check { opacity: 1; }
+    .bank-card .check::after {
+      content: ''; width: 5px; height: 8px;
+      border-right: 2px solid #fff; border-bottom: 2px solid #fff;
+      transform: rotate(40deg) translate(-1px, -1px);
+    }
 
-  /* BANK SEARCH */
-  .search-wrap { position: relative; margin-bottom: 12px; }
-  .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
-  #bankSearch {
-    width: 100%; padding: 12px 12px 12px 40px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 11px; color: var(--text); font-family: inherit; font-size: 14px; outline: none;
-    transition: border-color .2s;
-  }
-  #bankSearch:focus { border-color: rgba(232,25,44,0.45); }
-  #bankSearch::placeholder { color: var(--muted); }
+    /* selected badge */
+    #selected-badge {
+      display: none; align-items: center; gap: 10px;
+      background: var(--accent-l); border: 1.5px solid #c5cef8;
+      border-radius: 8px; padding: 10px 12px;
+    }
+    #selected-badge.show { display: flex; }
+    #selected-badge img { width: 30px; height: 30px; object-fit: contain; border-radius: 5px; padding: 2px; background: #fff; border: 1px solid var(--border); }
+    .sel-name { font-size: 0.85rem; font-weight: 600; }
+    .sel-stk  { font-size: 0.75rem; color: var(--accent); font-family: 'DM Mono', monospace; margin-top: 1px; }
+    .change-btn {
+      margin-left: auto; font-size: 0.75rem; font-weight: 500;
+      color: var(--accent); background: none; border: none; cursor: pointer;
+      padding: 3px 8px; border-radius: 5px;
+      border: 1px solid #c5cef8;
+      transition: background .13s;
+    }
+    .change-btn:hover { background: #dde4fc; }
 
-  /* BANK GRID */
-  .bank-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr));
-    gap: 9px; max-height: 300px; overflow-y: auto;
-    scrollbar-width: thin; scrollbar-color: var(--surface2) transparent;
-    padding-right: 2px;
-  }
-  .bank-grid::-webkit-scrollbar { width: 4px; }
-  .bank-grid::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 4px; }
+    /* inputs */
+    .input-row { display: flex; gap: 10px; }
+    .input-row > * { flex: 1; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field input, .field select {
+      padding: 9px 11px;
+      border: 1.5px solid var(--border); border-radius: var(--radius);
+      font-family: inherit; font-size: 0.88rem; color: var(--text);
+      background: var(--bg); outline: none; transition: border-color .15s;
+      appearance: none; -webkit-appearance: none;
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6'%3E%3Cpath d='M1 1l4.5 4 4.5-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px;
+    }
+    .field input:focus, .field select:focus { border-color: var(--accent); background: #fff; }
+    .field input.updated { border-color: #43a047; animation: flash .35s ease; }
+    @keyframes flash { 0%,100% { background: #fff; } 50% { background: #e8f5e9; } }
 
-  .bank-item {
-    background: var(--surface2); border: 1.5px solid transparent;
-    border-radius: 11px; padding: 12px 8px;
-    cursor: pointer; text-align: center;
-    display: flex; flex-direction: column; align-items: center; gap: 7px;
-    transition: all .15s;
-  }
-  .bank-item:hover { border-color: rgba(232,25,44,0.28); background: rgba(232,25,44,0.05); }
-  .bank-item.selected {
-    border-color: var(--red); background: rgba(232,25,44,0.1);
-    box-shadow: 0 0 16px rgba(232,25,44,0.12);
-  }
-  .bank-logo { width: 38px; height: 38px; object-fit: contain; border-radius: 8px; background: #fff; padding: 3px; }
-  .bank-short { font-size: 11px; font-weight: 700; color: var(--text); }
-  .bank-name-sm { font-size: 9px; color: var(--muted); line-height: 1.3; }
+    /* ── Right panel ── */
+    .right {
+      display: flex; align-items: center; justify-content: center;
+      padding: 28px; background: var(--bg); position: relative;
+      overflow-y: auto;
+    }
 
-  /* SELECTED BAR */
-  .sel-bar {
-    display: none; align-items: center; gap: 10px;
-    background: rgba(232,25,44,0.07); border: 1px solid rgba(232,25,44,0.18);
-    border-radius: 10px; padding: 9px 14px; margin-bottom: 14px; font-size: 13px; font-weight: 500;
-  }
-  .sel-bar.show { display: flex; }
-  .sel-bar img { width: 26px; height: 26px; object-fit: contain; background: white; border-radius: 6px; padding: 2px; }
-  .sel-bar-clear { margin-left: auto; color: var(--muted); cursor: pointer; font-size: 18px; line-height:1; transition: color .15s; }
-  .sel-bar-clear:hover { color: var(--red); }
+    .qr-shell {
+      background: var(--surface); border-radius: 16px;
+      box-shadow: var(--shadow); overflow: hidden;
+      width: 340px; min-height: 360px;
+      display: flex; flex-direction: column;
+      transition: box-shadow .2s;
+    }
+    .qr-shell:has(#qr-img[src]) { box-shadow: 0 6px 32px rgba(59,91,219,0.12); }
 
-  /* FORM */
-  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media(max-width:540px){ .fields { grid-template-columns: 1fr; } }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label { font-size: 11.5px; font-weight: 700; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
-  .field input {
-    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
-    padding: 11px 13px; color: var(--text); font-family: inherit; font-size: 14px; outline: none;
-    transition: border-color .2s;
-  }
-  .field input:focus { border-color: rgba(232,25,44,0.45); }
-  .field input::placeholder { color: var(--muted); }
+    .qr-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface);
+    }
+    .qr-header img.qh-logo { width: 30px; height: 30px; object-fit: contain; border-radius: 5px; border: 1px solid var(--border); padding: 2px; background: #fff; }
+    .qh-name { font-size: 0.85rem; font-weight: 600; }
+    .qh-stk  { font-size: 0.75rem; color: var(--sub); font-family: 'DM Mono', monospace; margin-top: 1px; }
+    .qh-amount { margin-left: auto; background: var(--green-l); color: var(--green); font-size: 0.77rem; font-weight: 600; padding: 2px 9px; border-radius: 20px; white-space: nowrap; }
 
-  /* TEMPLATE GRID */
-  .tmpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px,1fr)); gap: 10px; }
-  .tmpl-item {
-    background: var(--surface2); border: 1.5px solid transparent;
-    border-radius: 13px; padding: 16px 12px; cursor: pointer;
-    text-align: center; transition: all .15s;
-  }
-  .tmpl-item:hover { border-color: rgba(245,200,66,0.28); background: rgba(245,200,66,0.04); }
-  .tmpl-item.selected {
-    border-color: var(--gold); background: rgba(245,200,66,0.07);
-    box-shadow: 0 0 16px rgba(245,200,66,0.1);
-  }
-  .tmpl-preview {
-    width: 100%; aspect-ratio: 3/2; border-radius: 8px;
-    background: var(--surface); margin-bottom: 10px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden; position: relative;
-  }
-  .tmpl-preview img { width: 100%; height: 100%; object-fit: contain; opacity: .85; }
-  .tmpl-preview .tmpl-placeholder { color: var(--muted); font-size: 28px; }
-  .tmpl-badge {
-    position: absolute; top: 5px; right: 5px;
-    background: rgba(245,200,66,0.15); border: 1px solid rgba(245,200,66,0.3);
-    color: var(--gold); font-size: 8px; font-weight: 800; letter-spacing: 1px;
-    padding: 2px 6px; border-radius: 999px; text-transform: uppercase;
-  }
-  .tmpl-code { font-size: 12px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
-  .tmpl-desc { font-size: 10px; color: var(--muted); }
+    .qr-body {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 20px 20px 16px; gap: 14px;
+    }
 
-  /* GENERATE BTN */
-  .btn-gen {
-    width: 100%; padding: 15px; margin-top: 20px;
-    background: linear-gradient(135deg, var(--red), var(--red-dark));
-    border: none; border-radius: 14px; color: white;
-    font-family: inherit; font-size: 15px; font-weight: 800; letter-spacing: .5px;
-    cursor: pointer; transition: all .2s; position: relative; overflow: hidden;
-  }
-  .btn-gen::before { content:''; position:absolute; inset:0; background: linear-gradient(135deg,rgba(255,255,255,0.12) 0%,transparent 50%); }
-  .btn-gen:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(232,25,44,0.32); }
-  .btn-gen:active { transform: translateY(0); }
+    .qr-wrap { position: relative; width: 260px; height: 260px; }
+    #qr-img {
+      width: 260px; height: 260px; object-fit: contain;
+      border-radius: 8px; border: 1px solid var(--border);
+      display: none; transition: opacity .2s;
+    }
+    #qr-img.visible { display: block; opacity: 1; }
+    .qr-placeholder {
+      width: 260px; height: 260px; border-radius: 8px;
+      border: 2px dashed var(--border);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; color: var(--sub); font-size: 0.82rem;
+    }
+    .qr-placeholder .big-icon { font-size: 2.5rem; opacity: .35; }
+    .qr-loading {
+      position: absolute; inset: 0;
+      background: rgba(247,248,252,.85);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      display: none;
+    }
+    .qr-loading.show { display: flex; }
+    .qr-loading .spin-sm {
+      width: 22px; height: 22px;
+      border: 2.5px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin .65s linear infinite;
+    }
 
-  /* QR OUTPUT */
-  #qrOutput { display: none; }
-  #qrOutput.show { display: block; }
+    /* link row */
+    .link-row {
+      width: 100%; display: flex; align-items: center; gap: 6px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 7px; padding: 6px 10px;
+    }
+    .link-row .link-url { font-size: 0.7rem; color: var(--sub); font-family: 'DM Mono', monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lbtn {
+      flex-shrink: 0; padding: 4px 9px; font-size: 0.71rem; font-weight: 500;
+      border: none; border-radius: 5px; cursor: pointer; transition: background .13s;
+    }
+    .lbtn.copy { background: var(--accent-l); color: var(--accent); }
+    .lbtn.open { background: var(--accent); color: #fff; }
+    .lbtn.copy:hover { background: #dde4fc; }
+    .lbtn.open:hover { background: #2c47c5; }
+    .lbtn.copied { background: var(--green-l); color: var(--green); }
 
-  .qr-wrap { display: flex; flex-direction: column; align-items: center; gap: 24px; }
-  @media(min-width:640px){ .qr-wrap { flex-direction: row; align-items: flex-start; } }
+    /* refresh mini btn */
+    .refresh-btn {
+      position: absolute; top: 14px; right: 14px;
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 0.95rem; color: var(--sub);
+      transition: all .15s; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); transform: rotate(20deg); }
+    .refresh-btn.spinning svg { animation: spin .5s linear; }
 
-  .qr-img-box {
-    flex-shrink: 0; background: white; border-radius: 18px; padding: 10px;
-    box-shadow: 0 0 40px rgba(232,25,44,0.14), 0 16px 50px rgba(0,0,0,0.35);
-    position: relative;
-  }
-  .qr-img-box img { display:block; width:210px; height:210px; border-radius: 10px; }
-  .vqr-badge {
-    position: absolute; top: -9px; right: -9px;
-    background: var(--red); color: white;
-    font-size: 8.5px; font-weight: 900; letter-spacing: 1.5px;
-    text-transform: uppercase; padding: 3px 8px; border-radius: 999px;
-  }
+    /* ── Placeholder state (no account selected) ── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 6px; text-align: center;
+    }
+    .empty-state .icon { font-size: 2.8rem; opacity: .2; }
+    .empty-state p { font-size: 0.82rem; color: var(--sub); }
 
-  .qr-detail { flex: 1; }
-  .qr-bank-hd { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-  .qr-bank-hd img { width: 46px; height: 46px; object-fit: contain; background: white; border-radius: 10px; padding: 4px; }
-  .qr-bank-nm { font-size: 17px; font-weight: 700; }
-  .qr-bank-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  .info-r { display: flex; flex-direction: column; gap: 3px; padding: 11px 0; border-bottom: 1px solid var(--border); }
-  .info-r:last-child { border: none; }
-  .info-k { font-size: 10.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
-  .info-v { font-size: 14px; font-weight: 600; }
-  .info-v.amt { color: var(--gold); font-size: 20px; font-weight: 800; }
-
-  .qr-btns { display: flex; gap: 9px; margin-top: 18px; }
-  .btn-act {
-    flex:1; padding: 11px; border-radius: 10px;
-    border: 1px solid var(--border); background: var(--surface2);
-    color: var(--text); font-family: inherit; font-size: 12.5px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;
-    transition: all .15s;
-  }
-  .btn-act:hover { border-color: rgba(232,25,44,0.3); background: rgba(232,25,44,0.06); }
-  .btn-act.prim { background: var(--red); border-color: var(--red); }
-  .btn-act.prim:hover { opacity: .85; }
-
-  /* TOAST */
-  .toast {
-    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-    background: var(--surface2); border: 1px solid var(--border);
-    padding: 11px 22px; border-radius: 999px; font-size: 13px; font-weight: 600;
-    box-shadow: 0 8px 28px rgba(0,0,0,0.35); z-index: 999;
-    pointer-events: none; opacity: 0; transition: opacity .2s;
-  }
-  .toast.show { opacity: 1; }
-
-  .empty { text-align:center; padding:28px; color:var(--muted); font-size:13px; }
-
-  /* STATS BAR */
-  .stats-bar {
-    display: flex; gap: 20px; justify-content: center;
-    padding: 14px; background: var(--surface2);
-    border-radius: 12px; margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .stat { text-align: center; }
-  .stat-val { font-size: 22px; font-weight: 800; color: var(--red); }
-  .stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-</style>
+    /* responsive */
+    @media (max-width: 720px) {
+      .layout { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: auto; overflow: visible; }
+      .left { height: auto; overflow: visible; border-right: none; border-bottom: 1px solid var(--border); }
+      .left-body { overflow: visible; }
+      .right { min-height: 420px; }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <div class="pill"><span class="pill-dot"></span>VietQR Generator</div>
-    <h1>Tạo mã QR<br>thanh toán nhanh</h1>
-    <p>Đọc trực tiếp từ <code style="color:var(--gold);font-size:12px">VietQR.xlsx</code> — hỗ trợ đầy đủ ngân hàng & template</p>
-  </header>
 
-  <!-- LOADING -->
-  <div id="loadingState">
-    <div class="load-spinner"></div>
-    <p>Đang đọc dữ liệu từ VietQR.xlsx...</p>
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <p style="font-size:.85rem;color:var(--sub)">Đang đọc VietQR.xlsx…</p>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <h1>🏦 VietQR Generator</h1>
+  <span class="badge" id="bank-count">…</span>
+  <div class="from-file">📄 <span>VietQR.xlsx</span> · List_bank</div>
+</div>
+
+<!-- 2-column layout -->
+<div class="layout">
+
+  <!-- LEFT: form -->
+  <div class="left">
+    <div class="left-body">
+
+      <!-- 1. Account picker -->
+      <div>
+        <div class="section-label">Tài khoản</div>
+
+        <!-- Selected badge (shown after pick) -->
+        <div id="selected-badge">
+          <img id="sel-logo" src="" alt="" />
+          <div>
+            <div class="sel-name" id="sel-name"></div>
+            <div class="sel-stk"  id="sel-stk"></div>
+          </div>
+          <button class="change-btn" id="change-btn">Đổi</button>
+        </div>
+
+        <!-- Bank picker (hidden after pick) -->
+        <div id="bank-picker">
+          <input type="text" id="bank-search" placeholder="Tìm ngân hàng…" autocomplete="off" />
+          <div id="bank-list"></div>
+        </div>
+      </div>
+
+      <!-- 2. Amount + template -->
+      <div>
+        <div class="section-label">Chi tiết</div>
+        <div class="input-row">
+          <div class="field">
+            <label style="font-size:.75rem;color:var(--sub);font-weight:500">Số tiền (VNĐ)</label>
+            <input type="number" id="amount" placeholder="VD: 25000" min="0" />
+          </div>
+          <div class="field">
+            <label style="font-size:.75rem;color:var(--sub);font-weight:500">Template</label>
+            <select id="template-select">
+              <option value="compact2">Compact 2</option>
+              <option value="compact">Compact</option>
+              <option value="print">Print</option>
+              <option value="BdT8CDO" selected>BdT8CDO</option>
+              <option value="qr_only">QR Only</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Account name -->
+      <div class="field">
+        <label style="font-size:.75rem;color:var(--sub);font-weight:500">Tên chủ tài khoản</label>
+        <input type="text" id="account-name" value="Huynh Tran Tuan Kiet" placeholder="VD: Nguyen Van A" />
+      </div>
+
+      <!-- 4. Memo -->
+      <div class="field">
+        <label style="font-size:.75rem;color:var(--sub);font-weight:500">Nội dung chuyển khoản</label>
+        <input type="text" id="memo" placeholder="VD: Thanh toan don hang" />
+      </div>
+
+    </div>
   </div>
 
-  <!-- ERROR -->
-  <div id="errorState">
-    <p id="errorMsg">⚠ Không tải được file VietQR.xlsx</p>
-    <p style="color:var(--muted);font-size:12px;margin-bottom:16px">Đảm bảo file <strong>VietQR.xlsx</strong> nằm cùng thư mục với index.html</p>
-    <button class="btn-retry" onclick="loadXLSX()">Thử lại</button>
-  </div>
+  <!-- RIGHT: QR display -->
+  <div class="right">
 
-  <!-- MAIN -->
-  <div id="mainContent">
-    <div class="stats-bar" id="statsBar"></div>
+    <!-- Refresh mini button -->
+    <button class="refresh-btn" id="refresh-btn" title="Tải lại QR">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+      </svg>
+    </button>
 
-    <!-- BANK SELECTION -->
-    <div class="card">
-      <div class="slabel">01 — Chọn ngân hàng</div>
-      <div class="sel-bar" id="selBar">
-        <img id="selBarLogo" src="" alt="">
-        <span id="selBarName"></span>
-        <span class="sel-bar-clear" onclick="clearBank()">×</span>
+    <div class="qr-shell" id="qr-shell">
+      <!-- QR header (bank info) -->
+      <div class="qr-header" id="qr-header" style="display:none">
+        <img class="qh-logo" id="qh-logo" src="" alt="" />
+        <div>
+          <div class="qh-name" id="qh-name"></div>
+          <div class="qh-stk"  id="qh-stk"></div>
+        </div>
+        <span class="qh-amount" id="qh-amount"></span>
       </div>
-      <div class="search-wrap">
-        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" id="bankSearch" placeholder="Tìm ngân hàng theo tên, mã..." oninput="filterBanks(this.value)">
-      </div>
-      <div class="bank-grid" id="bankGrid"></div>
-    </div>
 
-    <!-- FORM -->
-    <div class="card">
-      <div class="slabel">02 — Thông tin chuyển khoản</div>
-      <div class="fields">
-        <div class="field">
-          <label>Số tài khoản *</label>
-          <input type="text" id="accountNo" placeholder="VD: 1234567890" inputmode="numeric">
+      <div class="qr-body">
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state">
+          <div class="icon">🏦</div>
+          <p>Chọn tài khoản<br>để tạo mã QR</p>
         </div>
-        <div class="field">
-          <label>Tên chủ tài khoản</label>
-          <input type="text" id="accountName" placeholder="VD: Nguyen Van A">
+
+        <!-- QR image area -->
+        <div class="qr-wrap" id="qr-wrap" style="display:none">
+          <img id="qr-img" src="" alt="QR" />
+          <div class="qr-loading" id="qr-loading"><div class="spin-sm"></div></div>
         </div>
-        <div class="field">
-          <label>Số tiền (VNĐ)</label>
-          <input type="text" id="amount" placeholder="VD: 500000" inputmode="numeric" oninput="fmtAmt(this)">
-        </div>
-        <div class="field">
-          <label>Nội dung chuyển khoản</label>
-          <input type="text" id="addInfo" placeholder="VD: Thanh toan don hang">
+
+        <!-- Link -->
+        <div class="link-row" id="link-row" style="display:none">
+          <span class="link-url" id="link-url"></span>
+          <button class="lbtn copy" id="copy-btn">Copy</button>
+          <button class="lbtn open" id="open-btn">Mở ↗</button>
         </div>
       </div>
-    </div>
-
-    <!-- TEMPLATE -->
-    <div class="card">
-      <div class="slabel">03 — Chọn template QR</div>
-      <div class="tmpl-grid" id="tmplGrid"></div>
-    </div>
-
-    <button class="btn-gen" onclick="generateQR()">✦ Tạo mã QR ngay</button>
-
-    <!-- OUTPUT -->
-    <div class="card" id="qrOutput" style="margin-top:20px">
-      <div class="slabel">Mã QR của bạn</div>
-      <div id="qrContent"></div>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-// ── STATE ──
-let BANKS = [];
-let selectedBank = null;
-let selectedTemplate = 'compact2';
+let ACCOUNTS = [];
+let BANK_MAP  = {};
+let selected  = null;
+let debounceTimer = null;
+let currentUrl = "";
 
-const TEMPLATE_META = {
-  'compact2': { desc: 'Gọn nhất, logo + QR', icon: '◼' },
-  'compact':  { desc: 'Thu gọn có thông tin', icon: '▪' },
-  'qr_only':  { desc: 'Chỉ mã QR thuần', icon: '⬛' },
-  'print':    { desc: 'Chuẩn in ấn, ngang', icon: '🖨' },
-  'BdT8CDO':  { desc: 'Template tùy chỉnh', icon: '✦' },
-  'gift':     { desc: 'Thiết kế quà tặng', icon: '🎁' },
-};
-
-// ── LOAD XLSX ──
+// ── Load xlsx ─────────────────────────────────────────────────────────────
 async function loadXLSX() {
-  document.getElementById('loadingState').style.display = 'block';
-  document.getElementById('errorState').style.display = 'none';
-  document.getElementById('mainContent').style.display = 'none';
-
   try {
-    const res = await fetch('./VietQR.xlsx');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const buf = await res.arrayBuffer();
-    const wb = XLSX.read(buf, { type: 'array' });
+    const ab = await (await fetch("VietQR.xlsx")).arrayBuffer();
+    const wb = XLSX.read(ab, { type: "array" });
 
-    // Read sheet "API - io"
-    const ws = wb.Sheets['API - io'];
-    if (!ws) throw new Error('Không tìm thấy sheet "API - io"');
+    // API-io: logo + shortName
+    const apiName = wb.SheetNames.find(n => n.includes("API"));
+    if (apiName) {
+      XLSX.utils.sheet_to_json(wb.Sheets[apiName], { defval: "" }).forEach(r => {
+        const bin = String(r["data__bin"] || "").trim();
+        if (bin) BANK_MAP[bin] = {
+          logo:      String(r["data__logo"]      || ""),
+          shortName: String(r["data__shortName"] || r["data__short_name"] || ""),
+        };
+      });
+    }
 
-    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    // List_bank
+    const listName = wb.SheetNames.find(n => n.toLowerCase().includes("list"));
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[listName], { defval: "" });
 
-    // Collect unique templates from file
-    const tmplSet = new Set();
-    BANKS = rows
-      .filter(r => r['data__code'] && r['data__code'] !== '-')
+    ACCOUNTS = rows
+      .filter(r => r["data__bin"] && r["data_num"] && String(r["data__bin"]).trim() !== "-")
       .map(r => {
-        const t = (r['Templa'] || '').toString().trim();
-        if (t) tmplSet.add(t);
+        const bin = String(r["data__bin"]).trim();
+        const info = BANK_MAP[bin] || {};
         return {
-          id: r['data__id'],
-          name: r['data__name'] || '',
-          code: r['data__code'] || '',
-          bin: r['data__bin'] || '',
-          shortName: r['data__shortName'] || r['data__short_name'] || '',
-          logo: r['data__logo'] || '',
-          defaultTemplate: t || null,
+          label:     String(r["list_name"]       || r["data__code"] || ""),
+          stk:       String(r["data_num"]        || ""),
+          bin, name: String(r["data__name"]      || ""),
+          code:      String(r["data__code"]      || ""),
+          shortName: String(r["data__shortName"] || info.shortName || ""),
+          logo:      String(r["data__logo"]      || info.logo      || ""),
         };
       });
 
-    // Build template list: those found in file first, then fallbacks
-    const FILE_TEMPLATES = [...tmplSet];
-    window.TEMPLATES = FILE_TEMPLATES.length ? FILE_TEMPLATES : ['compact2','compact','qr_only','print'];
-    selectedTemplate = window.TEMPLATES[0];
-
-    init();
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById("bank-count").textContent = ACCOUNTS.length + " tài khoản";
+    renderCards(ACCOUNTS);
+    document.getElementById("loading-overlay").classList.add("hidden");
   } catch(e) {
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('errorMsg').textContent = '⚠ ' + e.message;
-    document.getElementById('errorState').style.display = 'block';
+    document.getElementById("loading-overlay").querySelector("p").textContent =
+      "❌ " + e.message + " — đặt VietQR.xlsx cùng thư mục";
   }
 }
 
-function init() {
-  // Stats
-  const tmplCount = window.TEMPLATES.length;
-  document.getElementById('statsBar').innerHTML = `
-    <div class="stat"><div class="stat-val">${BANKS.length}</div><div class="stat-lbl">Ngân hàng</div></div>
-    <div class="stat"><div class="stat-val">${tmplCount}</div><div class="stat-lbl">Template</div></div>
-    <div class="stat"><div class="stat-val">VietQR</div><div class="stat-lbl">Chuẩn thanh toán</div></div>
-  `;
-  renderBanks(BANKS);
-  renderTemplates();
-}
-
-// ── BANK RENDER ──
-function renderBanks(list) {
-  const g = document.getElementById('bankGrid');
-  if (!list.length) { g.innerHTML = '<div class="empty">Không tìm thấy ngân hàng nào</div>'; return; }
-  g.innerHTML = list.map(b => `
-    <div class="bank-item ${selectedBank?.id === b.id ? 'selected' : ''}" onclick="selectBank(${b.id})">
-      <img class="bank-logo" src="${b.logo}" alt="${b.shortName}"
-        onerror="this.style.display='none'">
-      <div class="bank-short">${b.shortName}</div>
-      <div class="bank-name-sm">${b.name.length > 28 ? b.name.slice(0,26)+'…' : b.name}</div>
-    </div>
-  `).join('');
-}
-
-function filterBanks(q) {
-  const s = q.toLowerCase().trim();
-  renderBanks(s ? BANKS.filter(b =>
-    b.shortName.toLowerCase().includes(s) ||
-    b.name.toLowerCase().includes(s) ||
-    b.code.toLowerCase().includes(s)
-  ) : BANKS);
-}
-
-function selectBank(id) {
-  selectedBank = BANKS.find(b => b.id == id);
-  // If bank has a default template from xlsx, auto-select it
-  if (selectedBank?.defaultTemplate) {
-    selectedTemplate = selectedBank.defaultTemplate;
-    renderTemplates();
+// ── Render cards ──────────────────────────────────────────────────────────
+function renderCards(list) {
+  const el = document.getElementById("bank-list");
+  el.innerHTML = "";
+  if (!list.length) {
+    el.innerHTML = '<p style="padding:8px;font-size:.8rem;color:var(--sub)">Không tìm thấy</p>';
+    return;
   }
-  filterBanks(document.getElementById('bankSearch').value);
-  const bar = document.getElementById('selBar');
-  bar.classList.add('show');
-  document.getElementById('selBarLogo').src = selectedBank.logo;
-  document.getElementById('selBarName').textContent = `${selectedBank.shortName} — ${selectedBank.name}`;
-}
-
-function clearBank() {
-  selectedBank = null;
-  document.getElementById('selBar').classList.remove('show');
-  renderBanks(BANKS);
-}
-
-// ── TEMPLATE RENDER ──
-function renderTemplates() {
-  const PREVIEW_BASE = 'https://img.vietqr.io/image';
-  const demoBank = '970407'; const demoAcc = '44699999999';
-  document.getElementById('tmplGrid').innerHTML = window.TEMPLATES.map(code => {
-    const meta = TEMPLATE_META[code] || { desc: 'Template VietQR', icon: '◻' };
-    const previewUrl = `${PREVIEW_BASE}/${demoBank}-${demoAcc}-${code}.png?amount=50000`;
-    const isSel = selectedTemplate === code;
-    return `
-      <div class="tmpl-item ${isSel ? 'selected' : ''}" onclick="selectTemplate('${code}')">
-        <div class="tmpl-preview">
-          <img src="${previewUrl}" alt="${code}"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-            onload="this.style.opacity=1" style="opacity:0;transition:opacity .3s">
-          <div class="tmpl-placeholder" style="display:none">${meta.icon}</div>
-          ${isSel ? '<span class="tmpl-badge">✓ Đang chọn</span>' : ''}
-        </div>
-        <div class="tmpl-code">${code}</div>
-        <div class="tmpl-desc">${meta.desc}</div>
+  list.forEach(acc => {
+    const d = document.createElement("div");
+    d.className = "bank-card" + (selected && selected.bin===acc.bin && selected.stk===acc.stk ? " active" : "");
+    d.innerHTML = `
+      <img src="${acc.logo}" alt="" onerror="this.style.display='none'" />
+      <div>
+        <div class="bc-name">${acc.label || acc.code}</div>
+        <div class="bc-stk">STK: ${acc.stk}</div>
       </div>
-    `;
-  }).join('');
+      <div class="check"></div>`;
+    d.addEventListener("click", () => selectAccount(acc));
+    el.appendChild(d);
+  });
 }
 
-function selectTemplate(code) {
-  selectedTemplate = code;
-  renderTemplates();
+// ── Select account ─────────────────────────────────────────────────────────
+function selectAccount(acc) {
+  selected = acc;
+  // show badge, hide picker
+  document.getElementById("bank-picker").style.display = "none";
+  const badge = document.getElementById("selected-badge");
+  badge.classList.add("show");
+  document.getElementById("sel-logo").src = acc.logo;
+  document.getElementById("sel-name").textContent = `${acc.label} – ${acc.shortName}`;
+  document.getElementById("sel-stk").textContent  = `STK: ${acc.stk}`;
+  generateQR();
 }
 
-// ── AMOUNT FORMAT ──
-function fmtAmt(el) {
-  const raw = el.value.replace(/\D/g, '');
-  el.value = raw ? parseInt(raw).toLocaleString('vi-VN') : '';
-}
+document.getElementById("change-btn").addEventListener("click", () => {
+  document.getElementById("selected-badge").classList.remove("show");
+  document.getElementById("bank-picker").style.display = "block";
+  document.getElementById("bank-search").value = "";
+  renderCards(ACCOUNTS);
+  // keep QR visible but no longer updates until new pick
+});
 
-function getRawAmt() {
-  return document.getElementById('amount').value.replace(/[^\d]/g, '');
-}
+// ── Search ─────────────────────────────────────────────────────────────────
+document.getElementById("bank-search").addEventListener("input", function() {
+  const q = this.value.toLowerCase().trim();
+  renderCards(!q ? ACCOUNTS : ACCOUNTS.filter(a =>
+    a.label.toLowerCase().includes(q) || a.code.toLowerCase().includes(q) ||
+    a.shortName.toLowerCase().includes(q) || a.stk.includes(q)
+  ));
+});
 
-// ── GENERATE QR ──
+// ── Auto-generate on input change (debounced) ─────────────────────────────
+["amount","template-select","memo","account-name"].forEach(id => {
+  const el = document.getElementById(id);
+  const evt = id === "template-select" ? "change" : "input";
+  el.addEventListener(evt, () => {
+    if (!selected) return;
+    clearTimeout(debounceTimer);
+    // immediate on select change, debounce on text input
+    if (id === "template-select") { generateQR(); return; }
+    debounceTimer = setTimeout(generateQR, 500);
+  });
+  // also trigger on Enter
+  if (evt === "input") {
+    el.addEventListener("keydown", e => {
+      if (e.key === "Enter" && selected) { clearTimeout(debounceTimer); generateQR(); }
+    });
+  }
+});
+
+// ── Generate QR ────────────────────────────────────────────────────────────
 function generateQR() {
-  if (!selectedBank) { toast('⚠ Vui lòng chọn ngân hàng'); return; }
-  const acc = document.getElementById('accountNo').value.trim();
-  if (!acc) { toast('⚠ Vui lòng nhập số tài khoản'); return; }
+  if (!selected) return;
 
-  const amt = getRawAmt();
-  const info = document.getElementById('addInfo').value.trim();
-  const name = document.getElementById('accountName').value.trim();
+  const amount   = document.getElementById("amount").value.trim();
+  const template = document.getElementById("template-select").value || "BdT8CDO";
+  const memo     = document.getElementById("memo").value.trim();
+  const accName  = document.getElementById("account-name").value.trim();
 
-  const base = `https://img.vietqr.io/image/${selectedBank.bin}-${acc}-${selectedTemplate}.png`;
+  let url = `https://img.vietqr.io/image/${selected.bin}-${selected.stk}-${template}.png`;
   const params = [];
-  if (amt) params.push(`amount=${amt}`);
-  if (info) params.push(`addInfo=${encodeURIComponent(info)}`);
-  if (name) params.push(`accountName=${encodeURIComponent(name)}`);
-  const url = base + (params.length ? '?' + params.join('&') : '');
+  if (amount)  params.push(`amount=${encodeURIComponent(amount)}`);
+  if (memo)    params.push(`addInfo=${encodeURIComponent(memo)}`);
+  const nm = accName || selected.shortName || selected.label;
+  if (nm) params.push(`accountName=${encodeURIComponent(nm)}`);
+  if (params.length) url += "?" + params.join("&");
 
-  const out = document.getElementById('qrOutput');
-  out.classList.add('show');
+  if (url === currentUrl) return; // no change
+  currentUrl = url;
 
-  const dispAmt = amt ? parseInt(amt).toLocaleString('vi-VN') + ' ₫' : '—';
+  // Update header
+  document.getElementById("qr-header").style.display = "flex";
+  document.getElementById("qh-logo").src  = selected.logo;
+  document.getElementById("qh-name").textContent = `${selected.label} – ${selected.shortName}`;
+  document.getElementById("qh-stk").textContent  = `STK: ${selected.stk}`;
+  document.getElementById("qh-amount").textContent = amount
+    ? Number(amount).toLocaleString("vi-VN") + " ₫" : "";
 
-  document.getElementById('qrContent').innerHTML = `
-    <div class="qr-wrap">
-      <div class="qr-img-box">
-        <span class="vqr-badge">VietQR</span>
-        <img src="${url}" alt="QR" style="opacity:0;transition:opacity .35s"
-          onload="this.style.opacity=1"
-          onerror="this.parentElement.innerHTML='<div style=padding:20px;color:#888;font-size:12px;text-align:center;width:210px>Không tải được QR.<br><br>Kiểm tra lại thông tin<br>hoặc thử template khác</div>'">
-      </div>
-      <div class="qr-detail">
-        <div class="qr-bank-hd">
-          <img src="${selectedBank.logo}" alt="${selectedBank.shortName}"
-            onerror="this.style.display='none'">
-          <div>
-            <div class="qr-bank-nm">${selectedBank.shortName}</div>
-            <div class="qr-bank-sub">${selectedBank.name}</div>
-          </div>
-        </div>
-        <div class="info-r"><div class="info-k">Số tài khoản</div><div class="info-v">${acc}</div></div>
-        ${name ? `<div class="info-r"><div class="info-k">Chủ tài khoản</div><div class="info-v">${name}</div></div>` : ''}
-        <div class="info-r"><div class="info-k">Số tiền</div><div class="info-v ${amt ? 'amt' : ''}">${dispAmt}</div></div>
-        ${info ? `<div class="info-r"><div class="info-k">Nội dung</div><div class="info-v">${info}</div></div>` : ''}
-        <div class="info-r"><div class="info-k">Template</div><div class="info-v">${selectedTemplate}</div></div>
-        <div class="qr-btns">
-          <button class="btn-act prim" onclick="dlQR('${url}','${selectedBank.shortName}_${acc}')">⬇ Tải QR</button>
-          <button class="btn-act" onclick="cpLink('${url}')">🔗 Copy link</button>
-          <button class="btn-act" onclick="cpLink2()">📋 Copy URL</button>
-        </div>
-      </div>
-    </div>
-  `;
-  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Show QR area, hide empty state
+  document.getElementById("empty-state").style.display = "none";
+  document.getElementById("qr-wrap").style.display = "block";
+  document.getElementById("link-row").style.display = "flex";
+
+  // Loading
+  const qrImg   = document.getElementById("qr-img");
+  const loading  = document.getElementById("qr-loading");
+  loading.classList.add("show");
+  qrImg.classList.remove("visible");
+
+  const img = new Image();
+  img.onload = () => {
+    qrImg.src = url;
+    qrImg.classList.add("visible");
+    loading.classList.remove("show");
+  };
+  img.onerror = () => { loading.classList.remove("show"); };
+  img.src = url;
+
+  // Link
+  document.getElementById("link-url").textContent = url;
+
+  const copyBtn = document.getElementById("copy-btn");
+  copyBtn.textContent = "Copy"; copyBtn.classList.remove("copied");
+  copyBtn.onclick = () => navigator.clipboard.writeText(url).then(() => {
+    copyBtn.textContent = "✓ OK"; copyBtn.classList.add("copied");
+    setTimeout(() => { copyBtn.textContent = "Copy"; copyBtn.classList.remove("copied"); }, 1800);
+  });
+  document.getElementById("open-btn").onclick = () => window.open(url, "_blank", "noopener");
 }
 
-window._lastQRUrl = '';
-function cpLink2() {
-  const url = document.querySelector('#qrContent .qr-img-box img')?.src || '';
-  if (url) { navigator.clipboard.writeText(url); toast('✓ Đã copy URL QR'); }
-}
+// Refresh button
+document.getElementById("refresh-btn").addEventListener("click", () => {
+  if (!selected) return;
+  currentUrl = ""; // force regenerate
+  const btn = document.getElementById("refresh-btn");
+  btn.classList.add("spinning");
+  setTimeout(() => btn.classList.remove("spinning"), 500);
+  generateQR();
+});
 
-async function dlQR(url, name) {
-  try {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `VietQR_${name}.png`;
-    a.click();
-  } catch { window.open(url, '_blank'); }
-}
-
-function cpLink(url) {
-  navigator.clipboard.writeText(url).then(() => toast('✓ Đã sao chép link QR'));
-}
-
-let _toastTimer;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
-}
-
-// ── BOOT ──
 loadXLSX();
 </script>
 </body>
