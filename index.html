@@ -180,6 +180,18 @@
     .download-bar{background:var(--accent-l);border-top:1px solid #c5cef8;padding:10px 20px;display:flex;align-items:center;gap:12px;font-size:.82rem;color:var(--accent);font-weight:500;flex-shrink:0}
     .download-bar.hidden{display:none}
 
+    /* GitHub settings modal */
+    .gh-modal{background:var(--surface);border-radius:14px;padding:28px;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:18px}
+    .gh-modal code{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:2px 7px;font-family:'DM Mono',monospace;font-size:.78rem;color:var(--accent)}
+    .gh-status{padding:10px 14px;border-radius:8px;font-size:.82rem;font-weight:500;display:none}
+    .gh-status.ok{background:var(--green-l);color:var(--green);display:block}
+    .gh-status.err{background:var(--red-l);color:var(--red);display:block}
+    .gh-status.info{background:var(--accent-l);color:var(--accent);display:block}
+    .sync-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;transition:background .13s}
+    .sync-btn:hover{background:var(--accent-d)}
+    .sync-btn:disabled{opacity:.55;cursor:not-allowed}
+    .topbar-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+
     @media(max-width:720px){
       .layout{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;overflow:visible}
       .left{height:auto;overflow:visible;border-right:none;border-bottom:1px solid var(--border)}
@@ -220,6 +232,13 @@
   </a>
   <span class="badge" id="bank-count">…</span>
   <div class="from-file">📄 <span>VietQR.xlsx</span> · List_bank</div>
+  <div class="topbar-actions">
+    <button class="sync-btn" id="gh-sync-btn" onclick="openGHModal()" title="Đồng bộ lên GitHub / Vercel">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      Lưu lên GitHub
+    </button>
+    <button class="btn btn-ghost btn-sm" onclick="openGHSettings()" title="Cài đặt GitHub">⚙️</button>
+  </div>
 </div>
 
 <div class="tab-bar">
@@ -412,20 +431,61 @@
 
 <div id="toast"></div>
 
+<!-- GITHUB SETTINGS MODAL -->
+<div class="modal-backdrop hidden" id="gh-modal-backdrop">
+  <div class="gh-modal">
+    <div class="modal-title">⚙️ Cài đặt GitHub Sync</div>
+    <p style="font-size:.83rem;color:var(--sub);line-height:1.6">
+      Để lưu thẳng lên GitHub (Vercel tự deploy), bạn cần tạo <strong>Personal Access Token</strong> với quyền <code>repo</code>.<br>
+      <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener" style="color:var(--accent)">Tạo token tại đây →</a>
+    </p>
+    <div class="modal-fields">
+      <div class="field">
+        <label>GitHub Token <span style="color:var(--red)">*</span></label>
+        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+      </div>
+      <div class="input-row">
+        <div class="field">
+          <label>Owner (tên user/org) <span style="color:var(--red)">*</span></label>
+          <input type="text" id="gh-owner" placeholder="VD: your-username" />
+        </div>
+        <div class="field">
+          <label>Repository <span style="color:var(--red)">*</span></label>
+          <input type="text" id="gh-repo" placeholder="VD: vietqr-app" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Branch</label>
+        <input type="text" id="gh-branch" placeholder="main" value="main" />
+      </div>
+      <div class="field">
+        <label>Đường dẫn file XLSX trong repo</label>
+        <input type="text" id="gh-path" placeholder="VietQR.xlsx" value="VietQR.xlsx" />
+      </div>
+      <div class="gh-status" id="gh-test-status"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeGHModal()">Đóng</button>
+      <button class="btn btn-ghost" onclick="testGHConnection()">🔍 Kiểm tra kết nối</button>
+      <button class="btn btn-primary" onclick="saveGHSettings()">Lưu cài đặt</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
 <script>
 let ACCOUNTS=[], BANK_MAP={}, API_BANKS=[], selected=null, debounceTimer=null, currentUrl="";
-let editIndex=-1; // -1 = add mode, >=0 = edit mode
-let selectedApiBank=null; // ngân hàng đang chọn trong modal
-let workbook=null; // giữ lại workbook gốc để xuất
+let editIndex=-1;
+let selectedApiBank=null;
+let workbook=null;
 
 // ========== LOCAL STORAGE ==========
 const LS_KEY_ACCOUNTS="vietqr_accounts";
 const LS_KEY_API="vietqr_api_banks";
+const LS_KEY_GH="vietqr_gh_config";
 
 function saveToLS(){
-  try{
-    localStorage.setItem(LS_KEY_ACCOUNTS,JSON.stringify(ACCOUNTS));
-  }catch(e){console.warn("LS save failed",e);}
+  try{ localStorage.setItem(LS_KEY_ACCOUNTS,JSON.stringify(ACCOUNTS)); }catch(e){}
 }
 
 function loadFromLS(){
@@ -435,11 +495,9 @@ function loadFromLS(){
     const data=JSON.parse(raw);
     if(!Array.isArray(data)||data.length===0) return false;
     ACCOUNTS=data;
-    // Rebuild BANK_MAP từ accounts đã lưu
     ACCOUNTS.forEach(acc=>{
-      if(acc.bin&&!BANK_MAP[acc.bin]){
+      if(acc.bin&&!BANK_MAP[acc.bin])
         BANK_MAP[acc.bin]={logo:acc.logo,shortName:acc.shortName,name:acc.name,code:acc.code};
-      }
     });
     document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
     renderCards(ACCOUNTS);
@@ -449,9 +507,7 @@ function loadFromLS(){
 }
 
 function saveApiBanksToLS(){
-  try{
-    localStorage.setItem(LS_KEY_API,JSON.stringify(API_BANKS));
-  }catch(e){}
+  try{ localStorage.setItem(LS_KEY_API,JSON.stringify(API_BANKS)); }catch(e){}
 }
 
 function loadApiBanksFromLS(){
@@ -475,20 +531,166 @@ function loadApiBanksFromLS(){
   }catch(e){return false;}
 }
 
+// ========== GITHUB CONFIG ==========
+function loadGHConfig(){
+  // Ưu tiên: localStorage (người dùng nhập) → config.js (hardcode)
+  try{
+    const raw=localStorage.getItem(LS_KEY_GH);
+    const saved=raw?JSON.parse(raw):{};
+    const env=window.VIETQR_CONFIG||{};
+    return {
+      token: saved.token||env.GH_TOKEN||"",
+      owner: saved.owner||env.GH_OWNER||"",
+      repo:  saved.repo ||env.GH_REPO ||"",
+      branch:saved.branch||env.GH_BRANCH||"main",
+      path:  saved.path ||env.GH_PATH ||"VietQR.xlsx",
+    };
+  }catch(e){
+    const env=window.VIETQR_CONFIG||{};
+    return {token:env.GH_TOKEN||"",owner:env.GH_OWNER||"",repo:env.GH_REPO||"",branch:env.GH_BRANCH||"main",path:env.GH_PATH||"VietQR.xlsx"};
+  }
+}
+
+function saveGHSettings(){
+  const cfg={
+    token:document.getElementById("gh-token").value.trim(),
+    owner:document.getElementById("gh-owner").value.trim(),
+    repo:document.getElementById("gh-repo").value.trim(),
+    branch:document.getElementById("gh-branch").value.trim()||"main",
+    path:document.getElementById("gh-path").value.trim()||"VietQR.xlsx",
+  };
+  if(!cfg.token||!cfg.owner||!cfg.repo){
+    showStatus("gh-test-status","err","❌ Vui lòng điền đầy đủ Token, Owner và Repo");return;
+  }
+  localStorage.setItem(LS_KEY_GH,JSON.stringify(cfg));
+  showStatus("gh-test-status","ok","✅ Đã lưu cài đặt");
+  setTimeout(closeGHModal,1200);
+}
+
+async function testGHConnection(){
+  const cfg=getGHConfig();
+  if(!cfg) return;
+  showStatus("gh-test-status","info","🔍 Đang kiểm tra...");
+  try{
+    const r=await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}`,{
+      headers:{"Authorization":"token "+cfg.token,"Accept":"application/vnd.github.v3+json"}
+    });
+    if(r.ok){
+      const d=await r.json();
+      showStatus("gh-test-status","ok",`✅ Kết nối OK — file ${cfg.path} (${(d.size/1024).toFixed(1)} KB) tìm thấy trên branch ${cfg.branch}`);
+    }else{
+      const err=await r.json();
+      showStatus("gh-test-status","err","❌ Lỗi "+r.status+": "+(err.message||"Không xác định"));
+    }
+  }catch(e){
+    showStatus("gh-test-status","err","❌ Lỗi mạng: "+e.message);
+  }
+}
+
+function getGHConfig(){
+  const cfg=loadGHConfig();
+  if(!cfg.token||!cfg.owner||!cfg.repo){
+    showToast("⚙️ Chưa cài đặt GitHub — nhấn nút ⚙️ để cấu hình");
+    openGHSettings();
+    return null;
+  }
+  return cfg;
+}
+
+function openGHModal(){
+  // If no config yet, open settings
+  const cfg=loadGHConfig();
+  if(!cfg.token){ openGHSettings(); return; }
+  pushToGitHub();
+}
+
+function openGHSettings(){
+  const cfg=loadGHConfig();
+  document.getElementById("gh-token").value=cfg.token||"";
+  document.getElementById("gh-owner").value=cfg.owner||"";
+  document.getElementById("gh-repo").value=cfg.repo||"";
+  document.getElementById("gh-branch").value=cfg.branch||"main";
+  document.getElementById("gh-path").value=cfg.path||"VietQR.xlsx";
+  document.getElementById("gh-test-status").style.display="none";
+  document.getElementById("gh-modal-backdrop").classList.remove("hidden");
+}
+
+function closeGHModal(){
+  document.getElementById("gh-modal-backdrop").classList.add("hidden");
+}
+
+function showStatus(id,type,msg){
+  const el=document.getElementById(id);
+  el.className="gh-status "+type;
+  el.textContent=msg;
+}
+
+// ========== PUSH TO GITHUB ==========
+async function pushToGitHub(){
+  if(!workbook){ showToast("⚠ Workbook chưa sẵn sàng"); return; }
+  const cfg=getGHConfig();
+  if(!cfg) return;
+
+  const btn=document.getElementById("gh-sync-btn");
+  btn.disabled=true;
+  btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Đang đồng bộ…`;
+  showToast("⏫ Đang đẩy lên GitHub...");
+
+  try{
+    // Build XLSX binary
+    const wbOut=XLSX.write(workbook,{type:"base64",bookType:"xlsx"});
+
+    // Get current file SHA (needed for update)
+    const infoRes=await fetch(
+      `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}`,
+      {headers:{"Authorization":"token "+cfg.token,"Accept":"application/vnd.github.v3+json"}}
+    );
+    let sha=null;
+    if(infoRes.ok){ const d=await infoRes.json(); sha=d.sha; }
+
+    // Push file
+    const body={
+      message:`chore: update ${cfg.path} via VietQR Generator [${new Date().toLocaleString("vi-VN")}]`,
+      content:wbOut,
+      branch:cfg.branch,
+    };
+    if(sha) body.sha=sha;
+
+    const pushRes=await fetch(
+      `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`,
+      {
+        method:"PUT",
+        headers:{"Authorization":"token "+cfg.token,"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},
+        body:JSON.stringify(body)
+      }
+    );
+
+    if(pushRes.ok){
+      const d=await pushRes.json();
+      showToast("✅ Đã đẩy lên GitHub! Vercel sẽ deploy trong 1-2 phút.");
+      console.log("Pushed:",d.commit?.html_url);
+    }else{
+      const err=await pushRes.json();
+      showToast("❌ Lỗi GitHub: "+(err.message||pushRes.status));
+    }
+  }catch(e){
+    showToast("❌ Lỗi: "+e.message);
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg> Lưu lên GitHub`;
+  }
+}
+
 // ========== LOAD XLSX ==========
 async function loadXLSX(){
-  // Thử load từ localStorage trước
   const hasApi=loadApiBanksFromLS();
   const hasAccounts=loadFromLS();
   if(hasApi&&hasAccounts){
     document.getElementById("loading-overlay").classList.add("hidden");
-    document.getElementById("export-btn").style.display="";
     showToast("✅ Đã khôi phục dữ liệu từ bộ nhớ cục bộ");
-    // Vẫn fetch xlsx ngầm để cập nhật workbook cho export
     fetchWorkbookSilent();
     return;
   }
-  // Lần đầu hoặc LS trống → fetch file xlsx
   await fetchWorkbookFull();
 }
 
@@ -497,7 +699,6 @@ async function fetchWorkbookFull(){
     const ab=await(await fetch("VietQR.xlsx")).arrayBuffer();
     workbook=XLSX.read(ab,{type:"array"});
 
-    // Load API-io
     const apiName=workbook.SheetNames.find(n=>n.toLowerCase().includes("api"));
     if(apiName){
       API_BANKS=XLSX.utils.sheet_to_json(workbook.Sheets[apiName],{defval:""});
@@ -514,11 +715,9 @@ async function fetchWorkbookFull(){
       saveApiBanksToLS();
     }
 
-    // Load List_bank
     reloadListBank();
     saveToLS();
     document.getElementById("loading-overlay").classList.add("hidden");
-    document.getElementById("export-btn").style.display="";
   }catch(e){
     document.getElementById("loading-overlay").querySelector("p").textContent=
       "❌ "+e.message+" — đặt VietQR.xlsx cùng thư mục";
@@ -529,7 +728,7 @@ async function fetchWorkbookSilent(){
   try{
     const ab=await(await fetch("VietQR.xlsx")).arrayBuffer();
     workbook=XLSX.read(ab,{type:"array"});
-  }catch(e){/* silent */}
+  }catch(e){}
 }
 
 function reloadListBank(){
@@ -681,7 +880,7 @@ function renderManageTable(){
   document.getElementById("manage-count").textContent=filtered.length+" / "+ACCOUNTS.length+" tài khoản";
   const tbody=document.getElementById("manage-tbody");
   tbody.innerHTML="";
-  filtered.forEach((acc,fi)=>{
+  filtered.forEach((acc)=>{
     const realIdx=ACCOUNTS.indexOf(acc);
     const tr=document.createElement("tr");
     tr.innerHTML=`
@@ -726,7 +925,6 @@ function openAddModal(){
 function openEditModal(idx){
   editIndex=idx;
   const acc=ACCOUNTS[idx];
-  // find matching bank in API_BANKS
   selectedApiBank=API_BANKS.find(b=>String(b["data__bin"]).trim()===acc.bin)||null;
   document.getElementById("modal-title").textContent="✏️ Sửa tài khoản";
   document.getElementById("modal-save-btn").textContent="Cập nhật";
@@ -743,7 +941,6 @@ function openEditModal(idx){
 
 function closeModal(){document.getElementById("modal-backdrop").classList.add("hidden");}
 
-// Dò ngân hàng từ API-io
 function filterBankLookup(q){
   const res=document.getElementById("bank-lookup-results");
   const term=q.toLowerCase().trim();
@@ -798,14 +995,12 @@ function clearHints(){
   });
 }
 
-// Validation
 function validateDataNum(){
   const v=document.getElementById("f-datanum").value.trim();
   const h=document.getElementById("hint-datanum");
   if(!v){h.className="field-hint err";h.textContent="⚠ Số tài khoản không được để trống";return false;}
   if(!/^\d{6,20}$/.test(v)){h.className="field-hint warn";h.textContent="⚠ STK thường là 6-20 chữ số";}
   else{h.className="field-hint ok";h.textContent="✓ Hợp lệ";}
-  // Kiểm tra trùng STK (ngoại trừ khi edit chính nó)
   const dup=ACCOUNTS.some((a,i)=>a.stk===v&&i!==editIndex);
   if(dup){h.className="field-hint err";h.textContent="❌ STK này đã tồn tại trong danh sách";return false;}
   return true;
@@ -826,7 +1021,6 @@ function validateNameAc(){
 }
 
 function saveModal(){
-  // Validate
   if(!selectedApiBank){
     document.getElementById("hint-bank").className="field-hint err";
     document.getElementById("hint-bank").textContent="❌ Phải chọn ngân hàng từ danh sách API-io";
@@ -854,10 +1048,10 @@ function saveModal(){
 
   if(editIndex>=0){
     ACCOUNTS[editIndex]=newEntry;
-    showToast("✅ Đã cập nhật tài khoản");
+    showToast("✅ Đã cập nhật — nhớ bấm 'Lưu lên GitHub'");
   }else{
     ACCOUNTS.push(newEntry);
-    showToast("✅ Đã thêm tài khoản mới");
+    showToast("✅ Đã thêm — nhớ bấm 'Lưu lên GitHub'");
   }
 
   writeBackToWorkbook();
@@ -884,21 +1078,17 @@ document.getElementById("confirm-ok-btn").addEventListener("click",()=>{
   renderCards(ACCOUNTS);
   renderManageTable();
   document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
-  showToast("🗑 Đã xoá: "+acc.label+" ("+acc.stk+")");
+  showToast("🗑 Đã xoá: "+acc.label+" ("+acc.stk+") — nhớ bấm 'Lưu lên GitHub'");
   closeConfirm();
 });
 
-// ========== WRITE BACK + EXPORT ==========
+// ========== WRITE BACK TO WORKBOOK ==========
 function writeBackToWorkbook(){
   if(!workbook)return;
   const listName=workbook.SheetNames.find(n=>n.toLowerCase().includes("list"));
-  // Rebuild sheet data — chỉ ghi 3 cột nhập tay + các cột vlookup là formula
-  // Giữ header row gốc, ghi đè data rows không có dòng trống
   const headers=["data__id","list_name","data_num","name_ac","data__name","data__code","data__bin","data__shortName","data__logo","data__short_name"];
   const rows=[headers];
   ACCOUNTS.forEach(acc=>{
-    // 3 cột nhập tay: data_num, list_name (=label), name_ac
-    // Các cột còn lại lấy từ selectedApiBank (vlookup)
     rows.push([
       acc.dataId||"",
       acc.label,
@@ -914,15 +1104,7 @@ function writeBackToWorkbook(){
   });
   const ws=XLSX.utils.aoa_to_sheet(rows);
   workbook.Sheets[listName]=ws;
-  document.getElementById("export-btn").style.display="";
-  saveToLS(); // persist changes qua F5
-}
-
-function exportXLSX(){
-  if(!workbook)return;
-  XLSX.writeFile(workbook,"VietQR.xlsx");
-  document.getElementById("download-bar").classList.remove("hidden");
-  showToast("⬇ Đã xuất VietQR.xlsx");
+  saveToLS();
 }
 
 // ========== CLEAR LOCAL STORAGE ==========
@@ -949,7 +1131,7 @@ function switchTab(tab){
 function showToast(msg){
   const t=document.getElementById("toast");
   t.textContent=msg;t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2400);
+  setTimeout(()=>t.classList.remove("show"),2800);
 }
 
 // Close lookup on outside click
@@ -957,9 +1139,9 @@ document.addEventListener("click",e=>{
   if(!e.target.closest(".lookup-wrap"))
     document.getElementById("bank-lookup-results").classList.remove("show");
 });
-// Close modal on backdrop click
 document.getElementById("modal-backdrop").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
 document.getElementById("confirm-backdrop").addEventListener("click",e=>{if(e.target===e.currentTarget)closeConfirm();});
+document.getElementById("gh-modal-backdrop").addEventListener("click",e=>{if(e.target===e.currentTarget)closeGHModal();});
 
 loadXLSX();
 </script>
