@@ -17,9 +17,20 @@
       --radius:10px;--shadow:0 2px 16px rgba(0,0,0,.08);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+    html{height:100%;height:-webkit-fill-available}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 
+    html{scroll-behavior:smooth}
+    .left-body,.right,#bank-list{scroll-behavior:smooth;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+    .bank-card{touch-action:manipulation}
+    .btn,.lbtn,.change-btn,.refresh-btn,.tab-btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+    /* Swipe scroll fade edges on mobile */
+    @media(max-width:720px){
+      .left-body::after{
+        content:'';display:block;height:1px;
+      }
+    }
     #loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:999}
     #loading-overlay.hidden{display:none}
     .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite}
@@ -37,10 +48,10 @@
     .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
     .tab-btn:hover:not(.active){color:var(--text)}
 
-    #tab-qr{display:flex;flex:1;overflow:hidden}
+    #tab-qr{display:flex;flex:1;overflow:hidden;min-height:0}
     #tab-qr.show{display:flex}
 
-    .layout{display:grid;grid-template-columns:360px 1fr;height:calc(100vh - 100px);overflow:hidden;flex:1}
+    .layout{display:grid;grid-template-columns:360px 1fr;height:calc(100dvh - 108px);overflow:hidden;flex:1}
 
     .left{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
     .left-body{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:16px}
@@ -82,7 +93,7 @@
     .field input:focus,.field select:focus{border-color:var(--accent);background:#fff}
     .readonly-field{background:var(--accent-l)!important;border-color:#c5cef8!important;color:var(--accent)!important;font-weight:500;cursor:default}
 
-    .right{display:flex;align-items:center;justify-content:center;padding:28px;background:var(--bg);position:relative;overflow-y:auto}
+    .right{display:flex;align-items:flex-start;justify-content:center;padding:28px;background:var(--bg);position:relative;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
     .qr-shell{background:var(--surface);border-radius:16px;box-shadow:0 4px 24px rgba(59,91,219,.10),0 1px 4px rgba(0,0,0,.06);overflow:hidden;width:320px;display:flex;flex-direction:column}
     .qr-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface)}
@@ -157,11 +168,25 @@
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
     @media(max-width:720px){
-      .layout{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:auto;overflow:visible}
+      body{overflow-y:auto}
+      #tab-qr{overflow:visible;flex:none}
+      .layout{
+        grid-template-columns:1fr;
+        grid-template-rows:auto auto;
+        height:auto;
+        overflow:visible;
+        padding-bottom:env(safe-area-inset-bottom,16px)
+      }
       .left{height:auto;overflow:visible;border-right:none;border-bottom:1px solid var(--border)}
-      .left-body{overflow:visible}
-      .right{min-height:400px}
+      .left-body{overflow:visible;padding-bottom:8px}
+      .right{
+        min-height:500px;
+        align-items:center;
+        padding:20px 16px calc(env(safe-area-inset-bottom,0px) + 80px);
+      }
+      .qr-shell{width:100%;max-width:340px}
       .manage-content{padding:12px}
+      #toast{bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
     }
   </style>
 </head>
@@ -465,14 +490,14 @@ document.getElementById("bank-search").addEventListener("input",function(){
   ));
 });
 
-function scheduleQR(delay=120){clearTimeout(debounceTimer);debounceTimer=setTimeout(generateQR,delay);}
+function scheduleQR(delay=80){clearTimeout(debounceTimer);debounceTimer=setTimeout(generateQR,delay);}
 ["amount","memo"].forEach(id=>{
   document.getElementById(id).addEventListener("input",()=>{if(selected)scheduleQR(120);});
   document.getElementById(id).addEventListener("keydown",e=>{if(e.key==="Enter"&&selected){clearTimeout(debounceTimer);generateQR();}});
 });
 document.getElementById("template-select").addEventListener("change",()=>{if(selected){currentUrl="";generateQR();}});
 
-function generateQR(){
+function generateQR(forceFresh=false){
   if(!selected)return;
   const amount=document.getElementById("amount").value.trim();
   const template=document.getElementById("template-select").value||"BdT8CDO";
@@ -484,8 +509,12 @@ function generateQR(){
   if(memo)   p.push(`addInfo=${encodeURIComponent(memo)}`);
   if(accName)p.push(`accountName=${encodeURIComponent(accName)}`);
   if(p.length) url+="?"+p.join("&");
-  if(url===currentUrl)return;
+  const baseUrl=url;
+  // Only skip if same params and not forced refresh
+  if(url===currentUrl&&!forceFresh)return;
   currentUrl=url;
+  // Cache-bust for forced refresh
+  const fetchUrl=forceFresh?url+(url.includes("?")?"&":"?")+"_t="+Date.now():url;
   document.getElementById("qr-header").style.display="flex";
   document.getElementById("qh-logo").src=selected.logo;
   document.getElementById("qh-name").textContent=`${selected.label} – ${selected.shortName}`;
@@ -502,11 +531,11 @@ function generateQR(){
   const img=new Image();
   img.onload=()=>{
     if(reqId!==generateQR._reqId)return;
-    qrImg.src=url;qrImg.classList.add("visible");loading.classList.remove("show");
+    qrImg.src=fetchUrl;qrImg.classList.add("visible");loading.classList.remove("show");
   };
   img.onerror=()=>{if(reqId!==generateQR._reqId)return;loading.classList.remove("show");};
-  img.src=url;
-  document.getElementById("link-url").textContent=url;
+  img.src=fetchUrl;
+  document.getElementById("link-url").textContent=baseUrl;
   const copyBtn=document.getElementById("copy-btn");
   copyBtn.textContent="Copy";copyBtn.classList.remove("copied");
   copyBtn.onclick=()=>navigator.clipboard.writeText(url).then(()=>{
@@ -522,7 +551,7 @@ document.getElementById("refresh-btn").addEventListener("click",()=>{
   const btn=document.getElementById("refresh-btn");
   btn.classList.add("spinning");
   setTimeout(()=>btn.classList.remove("spinning"),500);
-  generateQR();
+  generateQR(true);
 });
 
 // ========== MANAGE TAB ==========
