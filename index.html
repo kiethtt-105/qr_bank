@@ -63,18 +63,19 @@
 
     #bank-search{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:.88rem;color:var(--text);outline:none;transition:border-color .15s;margin-bottom:8px;background:var(--bg)}
     #bank-search:focus{border-color:var(--accent);background:#fff}
-    #bank-list{display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto}
+    #bank-list{display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:260px;overflow-y:auto}
 
-    .bank-card{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;border:1.5px solid transparent;cursor:pointer;background:var(--bg);transition:all .14s}
+    .bank-card{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1.5px solid transparent;cursor:pointer;background:var(--bg);transition:all .14s;min-width:0}
     .bank-card:hover{border-color:#c5cef8;background:var(--accent-l)}
     .bank-card.active{border-color:var(--accent);background:var(--accent-l)}
-    .bank-card img{width:28px;height:28px;object-fit:contain;border-radius:5px;flex-shrink:0;border:1px solid var(--border);background:#fff;padding:2px}
-    .bc-name{font-size:.84rem;font-weight:600}
-    .bc-sub{font-size:.72rem;color:var(--sub);margin-top:1px;font-family:'DM Mono',monospace}
+    .bank-card img{width:26px;height:26px;object-fit:contain;border-radius:5px;flex-shrink:0;border:1px solid var(--border);background:#fff;padding:2px}
+    .bc-info{min-width:0;flex:1}
+    .bc-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bc-sub{font-size:.67rem;color:var(--sub);margin-top:1px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .bank-card.active .bc-sub{color:var(--accent)}
-    .check{margin-left:auto;width:18px;height:18px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0;transition:opacity .15s}
+    .check{width:14px;height:14px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0;transition:opacity .15s}
     .bank-card.active .check{opacity:1}
-    .check::after{content:'';width:5px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(40deg) translate(-1px,-1px)}
+    .check::after{content:'';width:4px;height:6px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(40deg) translate(-1px,-1px)}
 
     #selected-badge{display:none;align-items:center;gap:10px;background:var(--accent-l);border:1.5px solid #c5cef8;border-radius:8px;padding:10px 12px}
     #selected-badge.show{display:flex}
@@ -93,19 +94,19 @@
     .field input:focus,.field select:focus{border-color:var(--accent);background:#fff}
     .readonly-field{background:var(--accent-l)!important;border-color:#c5cef8!important;color:var(--accent)!important;font-weight:500;cursor:default}
 
-    .right{display:flex;align-items:flex-start;justify-content:center;padding:28px;background:var(--bg);position:relative;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .right{display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);position:relative;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-    .qr-shell{background:var(--surface);border-radius:16px;box-shadow:0 4px 24px rgba(59,91,219,.10),0 1px 4px rgba(0,0,0,.06);overflow:hidden;width:320px;display:flex;flex-direction:column}
+    .qr-shell{background:var(--surface);border-radius:16px;box-shadow:0 4px 24px rgba(59,91,219,.10),0 1px 4px rgba(0,0,0,.06);overflow:hidden;width:min(400px,100%);display:flex;flex-direction:column}
     .qr-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface)}
     .qr-header img{width:30px;height:30px;object-fit:contain;border-radius:5px;border:1px solid var(--border);padding:2px;background:#fff;flex-shrink:0}
     .qh-name{font-size:.85rem;font-weight:600}
     .qh-stk{font-size:.72rem;color:var(--sub);font-family:'DM Mono',monospace;margin-top:1px}
     .qh-amount{margin-left:auto;background:var(--green-l);color:var(--green);font-size:.77rem;font-weight:600;padding:2px 9px;border-radius:20px;white-space:nowrap}
     .qr-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 20px 16px;gap:14px}
-    .qr-wrap{position:relative;width:260px;height:260px}
-    #qr-img{width:260px;height:260px;object-fit:contain;border-radius:8px;border:1px solid var(--border);display:none;transition:opacity .2s}
+    .qr-wrap{position:relative;width:100%;aspect-ratio:1/1;max-width:320px}
+    #qr-img{width:100%;height:100%;object-fit:contain;border-radius:8px;border:1px solid var(--border);display:none;transition:opacity .2s}
     #qr-img.visible{display:block;opacity:1}
-    .qr-placeholder{width:260px;height:260px;border-radius:8px;border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--sub);font-size:.82rem}
+    .qr-placeholder{width:100%;aspect-ratio:1/1;max-width:320px;border-radius:8px;border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--sub);font-size:.82rem}
     .qr-placeholder .big-icon{font-size:2.8rem;opacity:.22}
     .qr-loading{position:absolute;inset:0;background:rgba(244,246,251,.85);border-radius:8px;display:none;align-items:center;justify-content:center}
     .qr-loading.show{display:flex}
@@ -179,12 +180,13 @@
       }
       .left{height:auto;overflow:visible;border-right:none;border-bottom:1px solid var(--border)}
       .left-body{overflow:visible;padding-bottom:8px}
+      #bank-list{grid-template-columns:1fr 1fr;max-height:200px}
       .right{
-        min-height:500px;
-        align-items:center;
-        padding:20px 16px calc(env(safe-area-inset-bottom,0px) + 80px);
+        min-height:auto;
+        align-items:stretch;
+        padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 24px);
       }
-      .qr-shell{width:100%;max-width:340px}
+      .qr-shell{width:100%;max-width:100%}
       .manage-content{padding:12px}
       #toast{bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
     }
@@ -450,9 +452,9 @@ function renderCards(list){
     d.className="bank-card"+(selected&&selected.bin===acc.bin&&selected.stk===acc.stk?" active":"");
     d.innerHTML=`
       <img src="${acc.logo}" alt="" onerror="this.style.display='none'" />
-      <div>
+      <div class="bc-info">
         <div class="bc-name">${acc.label||acc.code}</div>
-        <div class="bc-sub">STK: ${acc.stk}${acc.nameAc?' · '+acc.nameAc:''}</div>
+        <div class="bc-sub">${acc.stk}</div>
       </div>
       <div class="check"></div>`;
     d.addEventListener("click",()=>selectAccount(acc));
