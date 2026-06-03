@@ -640,16 +640,21 @@ async function pushToGitHub(){
     // Build XLSX binary
     const wbOut=XLSX.write(workbook,{type:"base64",bookType:"xlsx"});
 
-    // Get current file SHA (needed for update)
-    const infoRes = await fetch(
-      `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}&t=${Date.now()}`,
-      { 
-        headers: { "Authorization": "token " + cfg.token, "Accept": "application/vnd.github.v3+json" },
-        cache: "no-store"
-      }
+    // Get current file SHA — bust cache để tránh stale SHA gây lỗi "does not match"
+    const infoRes=await fetch(
+      `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}&_t=${Date.now()}`,
+      {headers:{"Authorization":"token "+cfg.token,"Accept":"application/vnd.github.v3+json"},cache:"no-store"}
     );
     let sha=null;
-    if(infoRes.ok){ const d=await infoRes.json(); sha=d.sha; }
+    if(infoRes.ok){
+      const d=await infoRes.json(); sha=d.sha;
+    } else if(infoRes.status!==404){
+      const err=await infoRes.json();
+      showToast("❌ Không lấy được SHA: "+(err.message||infoRes.status));
+      btn.disabled=false;
+      btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg> Lưu lên GitHub`;
+      return;
+    }
 
     // Push file
     const body={
@@ -1089,24 +1094,40 @@ document.getElementById("confirm-ok-btn").addEventListener("click",()=>{
 function writeBackToWorkbook(){
   if(!workbook)return;
   const listName=workbook.SheetNames.find(n=>n.toLowerCase().includes("list"));
-  const headers=["data__id","list_name","data_num","name_ac","data__name","data__code","data__bin","data__shortName","data__logo","data__short_name"];
-  const rows=[headers];
+  const ws=workbook.Sheets[listName];
+
+  // Đọc lại sheet gốc để lấy toàn bộ rows (kể cả công thức VLOOKUP)
+  const existingRows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+  if(!existingRows.length)return;
+
+  const hdr=existingRows[0]; // hàng tiêu đề
+  const idxId=hdr.indexOf("data__id");
+  const idxListName=hdr.indexOf("list_name");
+  const idxDataNum=hdr.indexOf("data_num");
+  const idxNameAc=hdr.indexOf("name_ac");
+
+  // Xây map: STK → ACCOUNTS entry mới
+  const accMap={};
+  ACCOUNTS.forEach(acc=>{ accMap[acc.stk]=acc; });
+
+  // Tạo rows mới: header + mỗi account
+  // Chỉ ghi 4 cột nhập tay; các cột còn lại giữ nguyên từ sheet gốc nếu có
+  const newRows=[hdr];
   ACCOUNTS.forEach(acc=>{
-    rows.push([
-      acc.dataId||"",
-      acc.label,
-      acc.stk,
-      acc.nameAc,
-      acc.name,
-      acc.code,
-      acc.bin,
-      acc.shortName,
-      acc.logo,
-      acc.shortName,
-    ]);
+    // Tìm hàng cũ trong sheet gốc (theo STK)
+    const oldRow=existingRows.slice(1).find(r=>String(r[idxDataNum]||"").trim()===acc.stk||
+      (r[idxDataNum]&&Number(r[idxDataNum]).toFixed(0)===acc.stk));
+    const row=oldRow?[...oldRow]:new Array(hdr.length).fill("");
+    // Ghi 4 cột nhập tay
+    if(idxId>=0)    row[idxId]=acc.dataId||"";
+    if(idxListName>=0) row[idxListName]=acc.label||"";
+    if(idxDataNum>=0)  row[idxDataNum]=acc.stk||"";
+    if(idxNameAc>=0)   row[idxNameAc]=acc.nameAc||"";
+    newRows.push(row);
   });
-  const ws=XLSX.utils.aoa_to_sheet(rows);
-  workbook.Sheets[listName]=ws;
+
+  const wsNew=XLSX.utils.aoa_to_sheet(newRows);
+  workbook.Sheets[listName]=wsNew;
   saveToLS();
 }
 
