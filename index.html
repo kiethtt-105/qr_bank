@@ -241,7 +241,7 @@
 </div>
 
 <script>
-let ACCOUNTS=[],BANK_MAP={},selected=null,debounceTimer=null,currentUrl="",abortCtrl=null;
+let ACCOUNTS=[],BANK_MAP={},selected=null,debounceTimer=null,currentUrl="";
 
 async function loadXLSX(){
   try{
@@ -370,11 +370,6 @@ function generateQR(){
   if(url===currentUrl)return;
   currentUrl=url;
 
-  // Abort request đang pending trước khi tạo cái mới
-  if(abortCtrl) abortCtrl.abort();
-  abortCtrl=new AbortController();
-  const signal=abortCtrl.signal;
-
   document.getElementById("qr-header").style.display="flex";
   document.getElementById("qh-logo").src=selected.logo;
   document.getElementById("qh-name").textContent=`${selected.label} – ${selected.shortName}`;
@@ -390,26 +385,21 @@ function generateQR(){
   loading.classList.add("show");
   qrImg.classList.remove("visible");
 
-  // Dùng fetch + AbortController để cancel được request cũ
-  fetch(url,{signal})
-    .then(r=>{
-      if(!r.ok) throw new Error("HTTP "+r.status);
-      return r.blob();
-    })
-    .then(blob=>{
-      if(signal.aborted) return;
-      const objUrl=URL.createObjectURL(blob);
-      // revoke object URL cũ nếu có
-      if(qrImg._objUrl) URL.revokeObjectURL(qrImg._objUrl);
-      qrImg._objUrl=objUrl;
-      qrImg.src=objUrl;
-      qrImg.classList.add("visible");
-      loading.classList.remove("show");
-    })
-    .catch(err=>{
-      if(err.name==="AbortError") return; // bị cancel chủ động, bỏ qua
-      loading.classList.remove("show");
-    });
+  // vietqr.io block fetch (CORS), phải dùng Image()
+  // Cancel request cũ bằng cách đánh dấu version — chỉ request mới nhất được hiển thị
+  const reqId=++generateQR._reqId;
+  const img=new Image();
+  img.onload=()=>{
+    if(reqId!==generateQR._reqId)return; // request cũ, bỏ qua
+    qrImg.src=url;
+    qrImg.classList.add("visible");
+    loading.classList.remove("show");
+  };
+  img.onerror=()=>{
+    if(reqId!==generateQR._reqId)return;
+    loading.classList.remove("show");
+  };
+  img.src=url;
 
   document.getElementById("link-url").textContent=url;
   const copyBtn=document.getElementById("copy-btn");
@@ -420,6 +410,7 @@ function generateQR(){
   });
   document.getElementById("open-btn").onclick=()=>window.open(url,"_blank","noopener");
 }
+generateQR._reqId=0;
 
 document.getElementById("refresh-btn").addEventListener("click",()=>{
   if(!selected)return;
