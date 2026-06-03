@@ -641,9 +641,12 @@ async function pushToGitHub(){
     const wbOut=XLSX.write(workbook,{type:"base64",bookType:"xlsx"});
 
     // Get current file SHA (needed for update)
-    const infoRes=await fetch(
-      `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}`,
-      {headers:{"Authorization":"token "+cfg.token,"Accept":"application/vnd.github.v3+json"}}
+    const infoRes = await fetch(
+      `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}?ref=${cfg.branch}&t=${Date.now()}`,
+      { 
+        headers: { "Authorization": "token " + cfg.token, "Accept": "application/vnd.github.v3+json" },
+        cache: "no-store"
+      }
     );
     let sha=null;
     if(infoRes.ok){ const d=await infoRes.json(); sha=d.sha; }
