@@ -60,23 +60,82 @@
 
     .left{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
     .left-body{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
-    .left-body::-webkit-scrollbar,#bank-list::-webkit-scrollbar{width:5px}
-    .left-body::-webkit-scrollbar-thumb,#bank-list::-webkit-scrollbar-thumb{background:#c5cef8;border-radius:4px}
-    .left-body::-webkit-scrollbar-thumb:hover,#bank-list::-webkit-scrollbar-thumb:hover{background:var(--accent)}
-    .left-body::-webkit-scrollbar-track,#bank-list::-webkit-scrollbar-track{background:var(--bg);border-radius:4px}
+    .left-body::-webkit-scrollbar{width:5px}
+    .left-body::-webkit-scrollbar-thumb{background:#c5cef8;border-radius:4px}
+    .left-body::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+    .left-body::-webkit-scrollbar-track{background:transparent}
+
+    /* Bank list scrollbar - luôn hiện, rõ ràng */
+    #bank-list::-webkit-scrollbar{width:6px}
+    #bank-list::-webkit-scrollbar-thumb{background:#c5cef8;border-radius:6px;transition:background .2s}
+    #bank-list::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+    #bank-list::-webkit-scrollbar-track{background:var(--bg);border-radius:6px;margin:4px 0}
 
     .section-label{display:none}
 
     #bank-search{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:.88rem;color:var(--text);outline:none;transition:border-color .15s;margin-bottom:8px;background:var(--bg)}
     #bank-search:focus{border-color:var(--accent);background:#fff}
-    .bank-list-wrap{position:relative}
-    .bank-list-wrap::after{content:'';position:absolute;bottom:0;left:0;right:6px;height:36px;background:linear-gradient(to bottom,transparent,var(--surface));border-radius:0 0 8px 8px;pointer-events:none;transition:opacity .2s}
-    .bank-list-wrap.at-bottom::after{opacity:0}
-    #bank-list{display:flex;flex-direction:column;gap:4px;max-height:340px;overflow-y:auto;overflow-x:hidden;padding-right:3px;scroll-behavior:smooth}
 
-    .bank-card{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;border:1.5px solid transparent;cursor:pointer;background:var(--bg);transition:all .14s;min-width:0}
-    .bank-card:hover{border-color:#c5cef8;background:var(--accent-l)}
-    .bank-card.active{border-color:var(--accent);background:var(--accent-l)}
+    /* Wrapper cố định 4 thẻ (~4 × 58px) + border đẹp */
+    .bank-list-wrap{
+      position:relative;
+      border:1.5px solid var(--border);
+      border-radius:10px;
+      background:var(--bg);
+      overflow:hidden;
+    }
+    /* Fade bottom */
+    .bank-list-wrap::after{
+      content:'';position:absolute;bottom:0;left:0;right:7px;height:32px;
+      background:linear-gradient(to bottom,transparent,var(--bg));
+      border-radius:0 0 10px 10px;pointer-events:none;transition:opacity .25s;z-index:1;
+    }
+    .bank-list-wrap.at-bottom::after{opacity:0}
+
+    /* Scroll indicator top */
+    .bank-list-wrap::before{
+      content:'';position:absolute;top:0;left:0;right:7px;height:20px;
+      background:linear-gradient(to top,transparent,var(--bg));
+      pointer-events:none;z-index:1;opacity:0;transition:opacity .25s;
+    }
+    .bank-list-wrap.scrolled::before{opacity:1}
+
+    #bank-list{
+      display:flex;flex-direction:column;gap:3px;
+      height:232px; /* cố định ~4 thẻ */
+      overflow-y:scroll; /* luôn hiện scrollbar */
+      overflow-x:hidden;
+      padding:6px 6px 6px 6px;
+      scroll-behavior:smooth;
+      scrollbar-gutter:stable;
+    }
+
+    .bank-card{
+      display:flex;align-items:center;gap:9px;
+      padding:9px 10px;border-radius:8px;
+      border:1.5px solid transparent;
+      cursor:pointer;background:var(--surface);
+      transition:border-color .15s, background .15s, transform .12s, box-shadow .15s;
+      min-width:0;flex-shrink:0;
+      user-select:none;
+    }
+    .bank-card:hover{
+      border-color:#c5cef8;
+      background:var(--accent-l);
+      transform:translateX(3px);
+      box-shadow:0 2px 8px rgba(59,91,219,.10);
+    }
+    .bank-card:active{
+      transform:translateX(3px) scale(.98);
+      box-shadow:0 1px 4px rgba(59,91,219,.15);
+      background:#dde4fc;
+    }
+    .bank-card.active{
+      border-color:var(--accent);
+      background:var(--accent-l);
+      box-shadow:0 2px 10px rgba(59,91,219,.13);
+    }
+    .bank-card.active:hover{transform:translateX(3px)}
     .bank-card img{width:32px;height:32px;object-fit:contain;border-radius:6px;flex-shrink:0;border:1px solid var(--border);background:#fff;padding:2px}
     .bc-info{min-width:0;flex:1}
     .bc-name{font-size:.81rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1107,10 +1166,11 @@ loadXLSX();
   if(!list||!wrap) return;
   function checkScroll(){
     var atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 8;
+    var scrolled  = list.scrollTop > 8;
     wrap.classList.toggle('at-bottom', atBottom);
+    wrap.classList.toggle('scrolled', scrolled);
   }
   list.addEventListener('scroll', checkScroll, {passive:true});
-  // Re-check after render/filter
   var obs = new MutationObserver(checkScroll);
   obs.observe(list, {childList:true});
   checkScroll();
