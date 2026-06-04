@@ -300,34 +300,58 @@
         display:flex;
         flex-direction:row;
         width:200vw;
-        height:calc(100dvh - 48px - 44px);
+        height:calc(100dvh - 48px - 56px);
         overflow:hidden;
         transition:transform .3s cubic-bezier(.4,0,.2,1);
       }
       .layout.show-right{transform:translateX(-50%)}
       .left{width:100vw;flex-shrink:0;height:100%;overflow:hidden;border-right:none;display:flex;flex-direction:column}
-      .left-body{flex:1;overflow-y:auto;padding:12px}
-      #bank-list{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto;overflow-x:hidden;padding-right:3px;scroll-behavior:smooth}
-      .right{width:100vw;flex-shrink:0;height:100%;overflow-y:auto;padding:12px 12px calc(env(safe-area-inset-bottom,0px)+16px);align-items:stretch}
+      .left-body{flex:1;overflow-y:auto;padding:14px}
+      #bank-list{
+        display:flex;flex-direction:column;gap:6px;
+        height:auto !important;
+        max-height:52vh !important;
+        overflow-y:scroll;overflow-x:hidden;
+        padding-right:4px;scroll-behavior:smooth;
+        scrollbar-gutter:stable;
+      }
+      /* Bank card to hơn trên mobile */
+      .bank-card{padding:13px 14px !important;border-radius:12px !important}
+      .bank-card img{width:40px !important;height:40px !important}
+      .bc-name{font-size:.95rem !important}
+      .bc-bank{font-size:.78rem !important}
+      .bc-sub{font-size:.75rem !important}
+      /* Search input to hơn */
+      #bank-search{padding:12px 14px !important;font-size:.95rem !important;border-radius:12px !important;margin-bottom:10px !important}
+      /* Các input field to hơn */
+      .field input,.field select{padding:13px 14px !important;font-size:.95rem !important;border-radius:12px !important}
+      .field label{font-size:.82rem !important}
+      .right{width:100vw;flex-shrink:0;height:100%;overflow-y:auto;padding:14px 14px calc(env(safe-area-inset-bottom,0px)+16px);align-items:stretch}
       .qr-shell{width:100%;max-width:100%}
       .topbar{padding:0 12px;gap:6px;height:48px}
       .topbar h1{font-size:.85rem}
       .from-file{display:none}
-      .btn-custom-qr{font-size:.7rem;padding:4px 8px}
-      .input-row{flex-direction:column;gap:8px}
+      .btn-custom-qr{font-size:.75rem;padding:8px 12px;border-radius:9px}
+      .input-row{flex-direction:column;gap:10px}
       .local-qr-bar{margin-top:0}
-      #toast{bottom:calc(env(safe-area-inset-bottom,0px)+56px)}
+      #toast{bottom:calc(env(safe-area-inset-bottom,0px)+64px)}
+      /* Nút Copy / Mở to hơn */
+      .lbtn{padding:13px 28px !important;font-size:.92rem !important;border-radius:11px !important}
+      /* Refresh btn to hơn */
+      .refresh-btn{width:40px !important;height:40px !important}
       .mob-tabs{
-        display:flex;height:44px;background:var(--surface);
+        display:flex;height:56px;background:var(--surface);
         border-top:1px solid var(--border);flex-shrink:0;
       }
       .mob-tab{
-        flex:1;display:flex;align-items:center;justify-content:center;
-        font-size:.82rem;font-weight:600;color:var(--sub);
+        flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+        font-size:.9rem;font-weight:700;color:var(--sub);
         border:none;background:none;cursor:pointer;font-family:inherit;
-        border-top:2.5px solid transparent;transition:all .15s;
+        border-top:3px solid transparent;transition:all .15s;
+        -webkit-tap-highlight-color:transparent;
       }
-      .mob-tab.active{color:var(--accent);border-top-color:var(--accent)}
+      .mob-tab.active{color:var(--accent);border-top-color:var(--accent);background:var(--accent-l)}
+      .mob-tab:active{opacity:.7}
     }
   </style>
 </head>
@@ -441,8 +465,14 @@
     </div>
   </div>
   <div class="mob-tabs">
-    <button class="mob-tab active" id="mob-tab-list" onclick="mobSwitch(0)">☰ Tài khoản</button>
-    <button class="mob-tab" id="mob-tab-qr" onclick="mobSwitch(1)">QR Code</button>
+    <button class="mob-tab active" id="mob-tab-list" onclick="mobSwitch(0)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>
+      Tài khoản
+    </button>
+    <button class="mob-tab" id="mob-tab-qr" onclick="mobSwitch(1)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="14" y="18" width="3" height="3" fill="none"/><rect x="18" y="14" width="3" height="3" fill="none"/></svg>
+      Mã QR
+    </button>
   </div>
 </div>
 
