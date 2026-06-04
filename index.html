@@ -451,8 +451,7 @@
 <div class="cqr-backdrop" id="cqr-backdrop">
   <div class="cqr-modal">
     <div class="cqr-modal-head">
-      <h2>✨ Tạo QR tùy chỉnh</h2>
-      <span style="font-size:.72rem;color:var(--sub);margin-right:auto;margin-left:6px">Tạo mã QR cho bất kỳ tài khoản nào — không cần lưu vào xlsx</span>
+      <h2>✨ TẠO MÃ QR</h2>
       <button class="cqr-modal-close" onclick="closeCustomQR()">✕</button>
     </div>
     <div class="cqr-modal-body">
@@ -462,7 +461,7 @@
           <label>Ngân hàng <span style="color:var(--red)">*</span></label>
           <div id="cqr-bank-picker">
             <div class="cqr-bank-search-wrap">
-              <input type="text" id="cqr-bank-search" placeholder="Tìm tên hoặc mã ngân hàng…" autocomplete="off" oninput="cqrFilterBank(this.value)" onfocus="cqrFilterBank(this.value)" />
+              <input type="text" id="cqr-bank-search"  autocomplete="off" oninput="cqrFilterBank(this.value)" onfocus="cqrFilterBank(this.value)" />
               <div class="cqr-bank-results" id="cqr-bank-results"></div>
             </div>
           </div>
@@ -478,17 +477,17 @@
         <div class="cqr-row">
           <div class="cqr-field">
             <label>Số tài khoản <span style="color:var(--red)">*</span></label>
-            <input type="text" id="cqr-stk" placeholder="VD: 1031451081" oninput="cqrSchedule()" />
+            <input type="text" id="cqr-stk"  oninput="cqrSchedule()" />
           </div>
           <div class="cqr-field">
             <label>Tên chủ tài khoản</label>
-            <input type="text" id="cqr-name" placeholder="VD: Nguyen Van A" oninput="cqrSchedule()" />
+            <input type="text" id="cqr-name"  oninput="cqrSchedule()" />
           </div>
         </div>
         <div class="cqr-row">
           <div class="cqr-field">
             <label>Số tiền (VNĐ)</label>
-            <input type="number" id="cqr-amount" placeholder="Để trống = không cố định" min="0" oninput="cqrSchedule()" />
+            <input type="number" id="cqr-amount"  min="0" oninput="cqrSchedule()" />
           </div>
           <div class="cqr-field">
             <label>Template</label>
@@ -498,7 +497,7 @@
         </div>
         <div class="cqr-field">
           <label>Nội dung chuyển khoản</label>
-          <input type="text" id="cqr-memo" placeholder="VD: Thanh toan don hang" oninput="cqrSchedule()" />
+          <input type="text" id="cqr-memo"  oninput="cqrSchedule()" />
         </div>
         <div class="cqr-actions">
           <button class="cqr-gen-btn" onclick="cqrGenerate()">⚡ Tạo mã QR</button>
