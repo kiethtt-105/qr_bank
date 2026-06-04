@@ -55,16 +55,16 @@
     .layout{display:grid;grid-template-columns:360px 1fr;height:calc(100dvh - 108px);overflow:hidden;flex:1}
 
     .left{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-    .left-body{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:16px}
+    .left-body{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
     .left-body::-webkit-scrollbar,#bank-list::-webkit-scrollbar{width:4px}
     .left-body::-webkit-scrollbar-thumb,#bank-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
     .left-body::-webkit-scrollbar-track,#bank-list::-webkit-scrollbar-track{background:transparent}
 
-    .section-label{font-size:.68rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+    .section-label{display:none}
 
     #bank-search{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:.88rem;color:var(--text);outline:none;transition:border-color .15s;margin-bottom:8px;background:var(--bg)}
     #bank-search:focus{border-color:var(--accent);background:#fff}
-    #bank-list{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+    #bank-list{display:flex;flex-direction:column;gap:4px}
 
     .bank-card{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;border:1.5px solid transparent;cursor:pointer;background:var(--bg);transition:all .14s;min-width:0}
     .bank-card:hover{border-color:#c5cef8;background:var(--accent-l)}
@@ -74,7 +74,7 @@
     .bc-name{font-size:.81rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .bc-bank{font-size:.69rem;color:var(--sub);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .bc-sub{font-size:.68rem;color:var(--sub);margin-top:1px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .bc-nameac{font-size:.68rem;color:var(--green);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bc-nameac{display:none}
     .bank-card.active .bc-sub{color:var(--accent)}
     .bank-card.active .bc-bank{color:var(--accent-d)}
     .bank-card.active .bc-nameac{color:var(--green)}
@@ -82,20 +82,7 @@
     .bank-card.active .check{opacity:1}
     .check::after{content:'';width:4px;height:6px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(40deg) translate(-1px,-1px)}
 
-    #selected-badge{display:none;flex-direction:column;gap:8px;background:var(--accent-l);border:1.5px solid #c5cef8;border-radius:10px;padding:12px 14px;margin-bottom:10px}
-    #selected-badge.show{display:flex}
-    .sel-row1{display:flex;align-items:center;gap:10px}
-    #selected-badge img{width:36px;height:36px;object-fit:contain;border-radius:7px;padding:3px;background:#fff;border:1px solid var(--border);flex-shrink:0}
-    .sel-name{font-size:.88rem;font-weight:700;color:var(--text)}
-    .sel-fullname{font-size:.72rem;color:var(--sub);margin-top:1px}
-    .sel-stk{font-size:.72rem;color:var(--accent);font-family:'DM Mono',monospace;margin-top:1px}
-    .sel-row2{display:flex;gap:6px;flex-wrap:wrap}
-    .sel-chip{background:#fff;border:1px solid #c5cef8;border-radius:20px;padding:2px 10px;font-size:.68rem;font-weight:500;display:flex;align-items:center;gap:4px}
-    .sel-chip .lbl{color:var(--sub)}
-    .sel-chip .val{color:var(--accent);font-family:'DM Mono',monospace}
-    .sel-chip .val.green{color:var(--green);font-family:inherit;font-weight:600}
-    .change-btn{margin-left:auto;font-size:.75rem;font-weight:500;color:var(--accent);background:none;border:1px solid #c5cef8;cursor:pointer;padding:3px 9px;border-radius:5px;font-family:inherit;transition:background .13s}
-    .change-btn:hover{background:#dde4fc}
+    #selected-badge{display:none!important}
 
     .btn-custom-qr{margin-left:auto;display:flex;align-items:center;gap:7px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;transition:background .13s;white-space:nowrap;flex-shrink:0}
     .btn-custom-qr:hover{background:var(--accent-d)}
@@ -180,9 +167,9 @@
     .qr-loading{position:absolute;inset:0;background:rgba(244,246,251,.85);border-radius:8px;display:none;align-items:center;justify-content:center}
     .qr-loading.show{display:flex}
     .spin-sm{width:22px;height:22px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .65s linear infinite}
-    .link-row{width:100%;display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 10px}
-    .link-url{font-size:.68rem;color:var(--sub);font-family:'DM Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .lbtn{flex-shrink:0;padding:4px 9px;font-size:.71rem;font-weight:500;border:none;border-radius:5px;cursor:pointer;transition:background .13s;font-family:inherit}
+    .link-row{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 0}
+    .link-url{display:none}
+    .lbtn{flex-shrink:0;padding:7px 18px;font-size:.78rem;font-weight:600;border:none;border-radius:7px;cursor:pointer;transition:background .13s;font-family:inherit}
     .lbtn.copy{background:var(--accent-l);color:var(--accent)}
     .lbtn.open{background:var(--accent);color:#fff}
     .lbtn.copy:hover{background:#dde4fc}
@@ -299,12 +286,10 @@
               <img id="sel-logo" src="" alt="" />
               <div style="min-width:0;flex:1">
                 <div class="sel-name" id="sel-name"></div>
-                <div class="sel-fullname" id="sel-fullname"></div>
               </div>
             </div>
             <div class="sel-row2">
               <div class="sel-chip"><span class="lbl">STK</span><span class="val" id="sel-stk"></span></div>
-              <div class="sel-chip"><span class="lbl">BIN</span><span class="val" id="sel-bin"></span></div>
               <div class="sel-chip" id="sel-nameac-chip" style="display:none"><span class="lbl">Chủ TK</span><span class="val green" id="sel-nameac"></span></div>
             </div>
           </div>
@@ -323,11 +308,6 @@
             <div class="field">
                 <label>Template</label>
                 <select id="template-select">
-                  <option value="compact2">compact 2</option>
-                  <option value="compact">compact</option>
-                  <option value="print">Print</option>
-                  <option value="BdT8CDO" selected>BdT8CDO</option>
-                  <option value="qr_only">QR Only</option>
                 </select>
             </div>
           </div>
@@ -368,7 +348,7 @@
             <div class="qr-loading" id="qr-loading"><div class="spin-sm"></div></div>
           </div>
           <div class="link-row" id="link-row" style="display:none">
-            <span class="link-url" id="link-url"></span>
+            <span class="link-url" id="link-url" style="display:none"></span>
             <button class="lbtn copy" id="copy-btn">Copy</button>
             <button class="lbtn open" id="open-btn">Mở ↗</button>
           </div>
@@ -492,11 +472,6 @@
           <div class="cqr-field">
             <label>Template</label>
             <select id="cqr-template" onchange="cqrGenerate()">
-              <option value="BdT8CDO" selected>BdT8CDO</option>
-              <option value="compact2">Compact 2</option>
-              <option value="compact">Compact</option>
-              <option value="print">Print</option>
-              <option value="qr_only">QR Only</option>
             </select>
           </div>
         </div>
@@ -564,9 +539,17 @@ async function loadXLSX(){
           name:String(r["data__name"]||""),
           code:String(r["data__code"]||""),
           id:r["data__id"],
+          template:String(r["Template"]||"").trim()||"BdT8CDO",
         };
       });
     }
+
+    // Build template options từ cột Template trong Excel
+    const tmplSet=[...new Set(API_BANKS.map(r=>String(r["Template"]||"").trim()).filter(Boolean))];
+    ["template-select","cqr-template"].forEach(id=>{
+      const el=document.getElementById(id);
+      el.innerHTML=tmplSet.map(t=>`<option value="${t}">${t}</option>`).join("");
+    });
 
     reloadListBank();
     document.getElementById("loading-overlay").classList.add("hidden");
@@ -597,6 +580,7 @@ function reloadListBank(){
         dataId:r["data__id"],
         listName:String(r["list_name"]||""),
         datanum:stk,
+        template:info.template||"BdT8CDO",
       };
     });
   document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
@@ -616,8 +600,7 @@ function renderCards(list){
     d.innerHTML=`
       <img src="${acc.logo}" alt="" onerror="this.style.display='none'" />
       <div class="bc-info">
-        <div class="bc-name">${acc.label||acc.code}</div>
-        <div class="bc-bank">${acc.name||acc.shortName||''}</div>
+        <div class="bc-name">${acc.label||acc.code} <span style="font-weight:400;color:var(--sub);font-size:.68rem">${acc.shortName||''}</span></div>
         <div class="bc-sub">STK: ${acc.stk}</div>
         ${acc.nameAc?`<div class="bc-nameac">👤 ${acc.nameAc}</div>`:''}
       </div>
@@ -634,15 +617,14 @@ function selectAccount(acc){
   badge.classList.add("show");
   document.getElementById("sel-logo").src=acc.logo;
   document.getElementById("sel-name").textContent=`${acc.label} – ${acc.shortName}`;
-  document.getElementById("sel-fullname").textContent=acc.name||'';
   document.getElementById("sel-stk").textContent=acc.stk;
-  document.getElementById("sel-bin").textContent=acc.bin||'—';
   const nacChip=document.getElementById("sel-nameac-chip");
   if(acc.nameAc){
     document.getElementById("sel-nameac").textContent=acc.nameAc;
     nacChip.style.display="flex";
   } else { nacChip.style.display="none"; }
   document.getElementById("account-name").value=acc.nameAc||"";
+  document.getElementById("template-select").value=acc.template||"BdT8CDO";
   renderCards(ACCOUNTS); // re-render to update active state
   generateQR();
 }
