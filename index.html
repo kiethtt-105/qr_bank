@@ -63,7 +63,7 @@
 
     #bank-search{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:.88rem;color:var(--text);outline:none;transition:border-color .15s;margin-bottom:8px;background:var(--bg)}
     #bank-search:focus{border-color:var(--accent);background:#fff}
-    #bank-list{display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:260px;overflow-y:auto}
+    #bank-list{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 
     .bank-card{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1.5px solid transparent;cursor:pointer;background:var(--bg);transition:all .14s;min-width:0}
     .bank-card:hover{border-color:#c5cef8;background:var(--accent-l)}
@@ -77,7 +77,7 @@
     .bank-card.active .check{opacity:1}
     .check::after{content:'';width:4px;height:6px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(40deg) translate(-1px,-1px)}
 
-    #selected-badge{display:none;align-items:center;gap:10px;background:var(--accent-l);border:1.5px solid #c5cef8;border-radius:8px;padding:10px 12px}
+    #selected-badge{display:none;align-items:center;gap:10px;background:var(--accent-l);border:1.5px solid #c5cef8;border-radius:8px;padding:10px 12px;margin-bottom:10px}
     #selected-badge.show{display:flex}
     #selected-badge img{width:30px;height:30px;object-fit:contain;border-radius:5px;padding:2px;background:#fff;border:1px solid var(--border)}
     .sel-name{font-size:.85rem;font-weight:600}
@@ -240,7 +240,6 @@
               <div class="sel-name" id="sel-name"></div>
               <div class="sel-stk" id="sel-stk"></div>
             </div>
-            <button class="change-btn" id="change-btn">Đổi</button>
           </div>
           <div id="bank-picker">
             <input type="text" id="bank-search" placeholder="Tìm ngân hàng…" autocomplete="off" />
@@ -440,6 +439,8 @@ function reloadListBank(){
     });
   document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
   renderCards(ACCOUNTS);
+  // Auto chọn tài khoản đầu tiên
+  if(ACCOUNTS.length>0) selectAccount(ACCOUNTS[0]);
 }
 
 // ========== QR TAB ==========
@@ -465,24 +466,15 @@ function renderCards(list){
 function selectAccount(acc){
   selected=acc;
   currentUrl="";
-  document.getElementById("bank-picker").style.display="none";
   const badge=document.getElementById("selected-badge");
   badge.classList.add("show");
   document.getElementById("sel-logo").src=acc.logo;
   document.getElementById("sel-name").textContent=`${acc.label} – ${acc.shortName}`;
   document.getElementById("sel-stk").textContent=`STK: ${acc.stk}`;
   document.getElementById("account-name").value=acc.nameAc||"";
+  renderCards(ACCOUNTS); // re-render to update active state
   generateQR();
 }
-
-document.getElementById("change-btn").addEventListener("click",()=>{
-  document.getElementById("selected-badge").classList.remove("show");
-  document.getElementById("bank-picker").style.display="block";
-  document.getElementById("bank-search").value="";
-  document.getElementById("account-name").value="";
-  currentUrl="";
-  renderCards(ACCOUNTS);
-});
 
 document.getElementById("bank-search").addEventListener("input",function(){
   const q=this.value.toLowerCase().trim();
