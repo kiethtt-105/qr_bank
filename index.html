@@ -224,34 +224,43 @@
     #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a2035;color:#fff;padding:10px 22px;border-radius:10px;font-size:.83rem;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:500}
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+    /* MOBILE SWIPE TABS */
+    .mob-tabs{display:none}
     @media(max-width:720px){
-      body{overflow-y:auto}
-      #tab-qr{overflow:visible;flex:none}
+      body{overflow:hidden}
+      #tab-qr{overflow:hidden;flex:1;display:flex;flex-direction:column}
       .layout{
-        grid-template-columns:1fr;
-        grid-template-rows:auto auto;
-        height:auto;
-        overflow:visible;
-        padding-bottom:env(safe-area-inset-bottom,16px)
+        display:flex;
+        flex-direction:row;
+        width:200vw;
+        height:calc(100dvh - 48px - 44px);
+        overflow:hidden;
+        transition:transform .3s cubic-bezier(.4,0,.2,1);
       }
-      .left{height:auto;overflow:visible;border-right:none;border-bottom:1px solid var(--border)}
-      .left-body{overflow:visible;padding-bottom:8px;padding:10px}
-      #bank-list{display:flex;flex-direction:column;gap:4px;max-height:none}
-      .bank-card{background:var(--bg)}
-      .right{
-        min-height:auto;
-        align-items:stretch;
-        padding:12px 12px calc(env(safe-area-inset-bottom,0px) + 16px);
-      }
+      .layout.show-right{transform:translateX(-50%)}
+      .left{width:100vw;flex-shrink:0;height:100%;overflow:hidden;border-right:none;display:flex;flex-direction:column}
+      .left-body{flex:1;overflow-y:auto;padding:12px}
+      #bank-list{display:flex;flex-direction:column;gap:4px}
+      .right{width:100vw;flex-shrink:0;height:100%;overflow-y:auto;padding:12px 12px calc(env(safe-area-inset-bottom,0px)+16px);align-items:stretch}
       .qr-shell{width:100%;max-width:100%}
-      .manage-content{padding:12px}
-      #toast{bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
-      .topbar{padding:0 12px;gap:6px;flex-wrap:wrap;height:auto;min-height:48px;padding-top:6px;padding-bottom:6px}
-      .topbar h1{font-size:.88rem}
+      .topbar{padding:0 12px;gap:6px;height:48px}
+      .topbar h1{font-size:.85rem}
       .from-file{display:none}
-      .btn-custom-qr{font-size:.72rem;padding:5px 10px}
-      .local-qr-bar{margin-top:0}
+      .btn-custom-qr{font-size:.7rem;padding:4px 8px}
       .input-row{flex-direction:column;gap:8px}
+      .local-qr-bar{margin-top:0}
+      #toast{bottom:calc(env(safe-area-inset-bottom,0px)+56px)}
+      .mob-tabs{
+        display:flex;height:44px;background:var(--surface);
+        border-top:1px solid var(--border);flex-shrink:0;
+      }
+      .mob-tab{
+        flex:1;display:flex;align-items:center;justify-content:center;
+        font-size:.82rem;font-weight:600;color:var(--sub);
+        border:none;background:none;cursor:pointer;font-family:inherit;
+        border-top:2.5px solid transparent;transition:all .15s;
+      }
+      .mob-tab.active{color:var(--accent);border-top-color:var(--accent)}
     }
   </style>
 </head>
@@ -363,6 +372,10 @@
         </div>
       </div>
     </div>
+  </div>
+  <div class="mob-tabs">
+    <button class="mob-tab active" id="mob-tab-list" onclick="mobSwitch(0)">☰ Tài khoản</button>
+    <button class="mob-tab" id="mob-tab-qr" onclick="mobSwitch(1)">QR Code</button>
   </div>
 </div>
 
@@ -635,6 +648,7 @@ function selectAccount(acc){
   document.getElementById("template-select").value=acc.template||"BdT8CDO";
   renderCards(ACCOUNTS); // re-render to update active state
   generateQR();
+  if(window.innerWidth<=720) setTimeout(()=>mobSwitch(1),80);
 }
 
 document.getElementById("bank-search").addEventListener("input",function(){
@@ -1066,6 +1080,16 @@ document.addEventListener("click",e=>{
 });
 document.getElementById("modal-backdrop").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
 document.getElementById("confirm-backdrop").addEventListener("click",e=>{if(e.target===e.currentTarget)closeConfirm();});
+
+// MOBILE TAB SWITCH
+function mobSwitch(idx){
+  const layout = document.querySelector('.layout');
+  if(!layout) return;
+  if(idx===1) layout.classList.add('show-right');
+  else layout.classList.remove('show-right');
+  document.getElementById('mob-tab-list').classList.toggle('active', idx===0);
+  document.getElementById('mob-tab-qr').classList.toggle('active', idx===1);
+}
 
 loadXLSX();
 </script>
