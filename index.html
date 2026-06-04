@@ -66,23 +66,34 @@
     #bank-search:focus{border-color:var(--accent);background:#fff}
     #bank-list{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 
-    .bank-card{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1.5px solid transparent;cursor:pointer;background:var(--bg);transition:all .14s;min-width:0}
+    .bank-card{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;border:1.5px solid transparent;cursor:pointer;background:var(--bg);transition:all .14s;min-width:0}
     .bank-card:hover{border-color:#c5cef8;background:var(--accent-l)}
     .bank-card.active{border-color:var(--accent);background:var(--accent-l)}
-    .bank-card img{width:26px;height:26px;object-fit:contain;border-radius:5px;flex-shrink:0;border:1px solid var(--border);background:#fff;padding:2px}
+    .bank-card img{width:32px;height:32px;object-fit:contain;border-radius:6px;flex-shrink:0;border:1px solid var(--border);background:#fff;padding:2px}
     .bc-info{min-width:0;flex:1}
-    .bc-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .bc-sub{font-size:.67rem;color:var(--sub);margin-top:1px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bc-name{font-size:.81rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bc-bank{font-size:.69rem;color:var(--sub);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bc-sub{font-size:.68rem;color:var(--sub);margin-top:1px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bc-nameac{font-size:.68rem;color:var(--green);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .bank-card.active .bc-sub{color:var(--accent)}
+    .bank-card.active .bc-bank{color:var(--accent-d)}
+    .bank-card.active .bc-nameac{color:var(--green)}
     .check{width:14px;height:14px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0;transition:opacity .15s}
     .bank-card.active .check{opacity:1}
     .check::after{content:'';width:4px;height:6px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(40deg) translate(-1px,-1px)}
 
-    #selected-badge{display:none;align-items:center;gap:10px;background:var(--accent-l);border:1.5px solid #c5cef8;border-radius:8px;padding:10px 12px;margin-bottom:10px}
+    #selected-badge{display:none;flex-direction:column;gap:8px;background:var(--accent-l);border:1.5px solid #c5cef8;border-radius:10px;padding:12px 14px;margin-bottom:10px}
     #selected-badge.show{display:flex}
-    #selected-badge img{width:30px;height:30px;object-fit:contain;border-radius:5px;padding:2px;background:#fff;border:1px solid var(--border)}
-    .sel-name{font-size:.85rem;font-weight:600}
+    .sel-row1{display:flex;align-items:center;gap:10px}
+    #selected-badge img{width:36px;height:36px;object-fit:contain;border-radius:7px;padding:3px;background:#fff;border:1px solid var(--border);flex-shrink:0}
+    .sel-name{font-size:.88rem;font-weight:700;color:var(--text)}
+    .sel-fullname{font-size:.72rem;color:var(--sub);margin-top:1px}
     .sel-stk{font-size:.72rem;color:var(--accent);font-family:'DM Mono',monospace;margin-top:1px}
+    .sel-row2{display:flex;gap:6px;flex-wrap:wrap}
+    .sel-chip{background:#fff;border:1px solid #c5cef8;border-radius:20px;padding:2px 10px;font-size:.68rem;font-weight:500;display:flex;align-items:center;gap:4px}
+    .sel-chip .lbl{color:var(--sub)}
+    .sel-chip .val{color:var(--accent);font-family:'DM Mono',monospace}
+    .sel-chip .val.green{color:var(--green);font-family:inherit;font-weight:600}
     .change-btn{margin-left:auto;font-size:.75rem;font-weight:500;color:var(--accent);background:none;border:1px solid #c5cef8;cursor:pointer;padding:3px 9px;border-radius:5px;font-family:inherit;transition:background .13s}
     .change-btn:hover{background:#dde4fc}
 
@@ -284,10 +295,17 @@
         <div>
           <div class="section-label">Tài khoản</div>
           <div id="selected-badge">
-            <img id="sel-logo" src="" alt="" />
-            <div>
-              <div class="sel-name" id="sel-name"></div>
-              <div class="sel-stk" id="sel-stk"></div>
+            <div class="sel-row1">
+              <img id="sel-logo" src="" alt="" />
+              <div style="min-width:0;flex:1">
+                <div class="sel-name" id="sel-name"></div>
+                <div class="sel-fullname" id="sel-fullname"></div>
+              </div>
+            </div>
+            <div class="sel-row2">
+              <div class="sel-chip"><span class="lbl">STK</span><span class="val" id="sel-stk"></span></div>
+              <div class="sel-chip"><span class="lbl">BIN</span><span class="val" id="sel-bin"></span></div>
+              <div class="sel-chip" id="sel-nameac-chip" style="display:none"><span class="lbl">Chủ TK</span><span class="val green" id="sel-nameac"></span></div>
             </div>
           </div>
           <div id="bank-picker">
@@ -599,7 +617,9 @@ function renderCards(list){
       <img src="${acc.logo}" alt="" onerror="this.style.display='none'" />
       <div class="bc-info">
         <div class="bc-name">${acc.label||acc.code}</div>
-        <div class="bc-sub">${acc.stk}</div>
+        <div class="bc-bank">${acc.name||acc.shortName||''}</div>
+        <div class="bc-sub">STK: ${acc.stk}</div>
+        ${acc.nameAc?`<div class="bc-nameac">👤 ${acc.nameAc}</div>`:''}
       </div>
       <div class="check"></div>`;
     d.addEventListener("click",()=>selectAccount(acc));
@@ -614,7 +634,14 @@ function selectAccount(acc){
   badge.classList.add("show");
   document.getElementById("sel-logo").src=acc.logo;
   document.getElementById("sel-name").textContent=`${acc.label} – ${acc.shortName}`;
-  document.getElementById("sel-stk").textContent=`STK: ${acc.stk}`;
+  document.getElementById("sel-fullname").textContent=acc.name||'';
+  document.getElementById("sel-stk").textContent=acc.stk;
+  document.getElementById("sel-bin").textContent=acc.bin||'—';
+  const nacChip=document.getElementById("sel-nameac-chip");
+  if(acc.nameAc){
+    document.getElementById("sel-nameac").textContent=acc.nameAc;
+    nacChip.style.display="flex";
+  } else { nacChip.style.display="none"; }
   document.getElementById("account-name").value=acc.nameAc||"";
   renderCards(ACCOUNTS); // re-render to update active state
   generateQR();
