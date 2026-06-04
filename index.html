@@ -86,6 +86,63 @@
     .change-btn{margin-left:auto;font-size:.75rem;font-weight:500;color:var(--accent);background:none;border:1px solid #c5cef8;cursor:pointer;padding:3px 9px;border-radius:5px;font-family:inherit;transition:background .13s}
     .change-btn:hover{background:#dde4fc}
 
+    .btn-custom-qr{margin-left:auto;display:flex;align-items:center;gap:7px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;transition:background .13s;white-space:nowrap;flex-shrink:0}
+    .btn-custom-qr:hover{background:var(--accent-d)}
+
+    /* CUSTOM QR MODAL */
+    .cqr-backdrop{position:fixed;inset:0;background:rgba(10,15,40,.5);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .18s}
+    .cqr-backdrop.open{opacity:1;pointer-events:all}
+    .cqr-modal{background:var(--surface);border-radius:16px;width:min(96vw,860px);max-height:90vh;display:flex;flex-direction:column;box-shadow:0 16px 56px rgba(0,0,0,.22);transform:translateY(12px);transition:transform .18s;overflow:hidden}
+    .cqr-backdrop.open .cqr-modal{transform:translateY(0)}
+    .cqr-modal-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .cqr-modal-head h2{font-size:.97rem;font-weight:700;flex:1;margin:0}
+    .cqr-modal-close{width:30px;height:30px;border:none;background:var(--bg);border-radius:7px;cursor:pointer;font-size:1.1rem;color:var(--sub);display:flex;align-items:center;justify-content:center}
+    .cqr-modal-close:hover{background:var(--border)}
+    .cqr-modal-body{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;min-height:0}
+    .cqr-left{padding:20px;overflow-y:auto;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:14px}
+    .cqr-right{display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+    .cqr-field{display:flex;flex-direction:column;gap:5px}
+    .cqr-field label{font-size:.73rem;font-weight:600;color:var(--sub)}
+    .cqr-field input,.cqr-field select{padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:.88rem;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s}
+    .cqr-field input:focus,.cqr-field select:focus{border-color:var(--accent);background:var(--surface)}
+    .cqr-bank-search-wrap{position:relative}
+    .cqr-bank-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);max-height:180px;overflow-y:auto;z-index:10;display:none}
+    .cqr-bank-results.show{display:block}
+    .cqr-bank-item{display:flex;align-items:center;gap:9px;padding:8px 11px;cursor:pointer;transition:background .12s}
+    .cqr-bank-item:hover{background:var(--accent-l)}
+    .cqr-bank-item img{width:24px;height:24px;object-fit:contain;border-radius:4px;border:1px solid var(--border);background:#fff;padding:1px;flex-shrink:0}
+    .cqr-bank-item .bi-name{font-size:.83rem;font-weight:600}
+    .cqr-bank-item .bi-bin{font-size:.7rem;color:var(--sub);font-family:'DM Mono',monospace;margin-left:auto}
+    .cqr-selected-bank{display:none;align-items:center;gap:9px;background:var(--accent-l);border:1.5px solid #c5cef8;border-radius:8px;padding:9px 12px}
+    .cqr-selected-bank.show{display:flex}
+    .cqr-selected-bank img{width:28px;height:28px;object-fit:contain;border-radius:5px;border:1px solid var(--border);background:#fff;padding:2px}
+    .cqr-selected-bank .csb-name{font-size:.84rem;font-weight:600}
+    .cqr-selected-bank .csb-sub{font-size:.7rem;color:var(--accent);font-family:'DM Mono',monospace;margin-top:1px}
+    .cqr-change{margin-left:auto;font-size:.72rem;color:var(--accent);background:none;border:1px solid #c5cef8;cursor:pointer;padding:2px 8px;border-radius:5px;font-family:inherit}
+    .cqr-change:hover{background:#dde4fc}
+    .cqr-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .cqr-actions{display:flex;gap:8px;padding-top:4px}
+    .cqr-gen-btn{flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:background .13s}
+    .cqr-gen-btn:hover{background:var(--accent-d)}
+    .cqr-reset-btn{padding:10px 16px;background:var(--bg);color:var(--sub);border:1.5px solid var(--border);border-radius:9px;font-family:inherit;font-size:.84rem;cursor:pointer}
+    .cqr-reset-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .cqr-qr-shell{background:var(--surface);border-radius:14px;box-shadow:0 4px 24px rgba(59,91,219,.1);overflow:hidden;width:300px}
+    .cqr-qr-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+    .cqr-qr-head img{width:28px;height:28px;object-fit:contain;border-radius:4px;border:1px solid var(--border);background:#fff;padding:2px;flex-shrink:0}
+    .cqr-qh-name{font-size:.82rem;font-weight:600}
+    .cqr-qh-stk{font-size:.68rem;color:var(--sub);font-family:'DM Mono',monospace;margin-top:1px}
+    .cqr-qh-amt{margin-left:auto;background:var(--green-l);color:var(--green);font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+    .cqr-qr-body{padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px}
+    .cqr-qr-wrap{position:relative;width:240px;height:240px}
+    .cqr-qr-wrap img{width:240px;height:240px;object-fit:contain;border-radius:8px;border:1px solid var(--border);display:none}
+    .cqr-qr-wrap img.visible{display:block}
+    .cqr-qr-loading{position:absolute;inset:0;background:rgba(244,246,251,.85);border-radius:8px;display:none;align-items:center;justify-content:center}
+    .cqr-qr-loading.show{display:flex}
+    .cqr-empty{width:240px;height:240px;border-radius:8px;border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--sub);font-size:.8rem;text-align:center;line-height:1.5}
+    .cqr-link-row{width:100%;display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:5px 9px}
+    .cqr-link-url{font-size:.65rem;color:var(--sub);font-family:'DM Mono',monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    @media(max-width:700px){.cqr-modal-body{grid-template-columns:1fr;grid-template-rows:auto auto}.cqr-right{border-top:1px solid var(--border)}}
+
     .input-row{display:flex;gap:10px}
     .input-row>*{flex:1}
     .field{display:flex;flex-direction:column;gap:5px}
@@ -214,6 +271,7 @@
   </a>
   <span class="badge" id="bank-count">…</span>
   <div class="from-file">📄 <span>VietQR.xlsx</span> · List_bank</div>
+  <button class="btn-custom-qr" id="open-custom-qr" onclick="openCustomQR()">+ Tạo QR tùy chỉnh</button>
 </div>
 
 
@@ -369,6 +427,101 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- CUSTOM QR MODAL -->
+<div class="cqr-backdrop" id="cqr-backdrop">
+  <div class="cqr-modal">
+    <div class="cqr-modal-head">
+      <h2>✨ Tạo QR tùy chỉnh</h2>
+      <span style="font-size:.72rem;color:var(--sub);margin-right:auto;margin-left:6px">Tạo mã QR cho bất kỳ tài khoản nào — không cần lưu vào xlsx</span>
+      <button class="cqr-modal-close" onclick="closeCustomQR()">✕</button>
+    </div>
+    <div class="cqr-modal-body">
+      <!-- LEFT: inputs -->
+      <div class="cqr-left">
+        <div class="cqr-field">
+          <label>Ngân hàng <span style="color:var(--red)">*</span></label>
+          <div id="cqr-bank-picker">
+            <div class="cqr-bank-search-wrap">
+              <input type="text" id="cqr-bank-search" placeholder="Tìm tên hoặc mã ngân hàng…" autocomplete="off" oninput="cqrFilterBank(this.value)" onfocus="cqrFilterBank(this.value)" />
+              <div class="cqr-bank-results" id="cqr-bank-results"></div>
+            </div>
+          </div>
+          <div class="cqr-selected-bank" id="cqr-sel-bank">
+            <img id="cqr-sel-logo" src="" alt="" onerror="this.style.display='none'" />
+            <div>
+              <div class="csb-name" id="cqr-sel-name"></div>
+              <div class="csb-sub" id="cqr-sel-bin"></div>
+            </div>
+            <button class="cqr-change" onclick="cqrChangeBank()">Đổi</button>
+          </div>
+        </div>
+        <div class="cqr-row">
+          <div class="cqr-field">
+            <label>Số tài khoản <span style="color:var(--red)">*</span></label>
+            <input type="text" id="cqr-stk" placeholder="VD: 1031451081" oninput="cqrSchedule()" />
+          </div>
+          <div class="cqr-field">
+            <label>Tên chủ tài khoản</label>
+            <input type="text" id="cqr-name" placeholder="VD: Nguyen Van A" oninput="cqrSchedule()" />
+          </div>
+        </div>
+        <div class="cqr-row">
+          <div class="cqr-field">
+            <label>Số tiền (VNĐ)</label>
+            <input type="number" id="cqr-amount" placeholder="Để trống = không cố định" min="0" oninput="cqrSchedule()" />
+          </div>
+          <div class="cqr-field">
+            <label>Template</label>
+            <select id="cqr-template" onchange="cqrGenerate()">
+              <option value="BdT8CDO" selected>BdT8CDO</option>
+              <option value="compact2">Compact 2</option>
+              <option value="compact">Compact</option>
+              <option value="print">Print</option>
+              <option value="qr_only">QR Only</option>
+            </select>
+          </div>
+        </div>
+        <div class="cqr-field">
+          <label>Nội dung chuyển khoản</label>
+          <input type="text" id="cqr-memo" placeholder="VD: Thanh toan don hang" oninput="cqrSchedule()" />
+        </div>
+        <div class="cqr-actions">
+          <button class="cqr-gen-btn" onclick="cqrGenerate()">⚡ Tạo mã QR</button>
+          <button class="cqr-reset-btn" onclick="cqrReset()">Làm mới</button>
+        </div>
+      </div>
+      <!-- RIGHT: preview -->
+      <div class="cqr-right">
+        <div class="cqr-qr-shell" id="cqr-shell">
+          <div class="cqr-qr-head" id="cqr-qr-head" style="display:none">
+            <img id="cqr-h-logo" src="" alt="" onerror="this.style.display='none'" />
+            <div>
+              <div class="cqr-qh-name" id="cqr-h-name"></div>
+              <div class="cqr-qh-stk" id="cqr-h-stk"></div>
+            </div>
+            <span class="cqr-qh-amt" id="cqr-h-amt"></span>
+          </div>
+          <div class="cqr-qr-body">
+            <div class="cqr-empty" id="cqr-empty">
+              <span style="font-size:2.2rem;opacity:.18">🏦</span>
+              Chọn ngân hàng &amp; nhập STK<br>để tạo mã QR
+            </div>
+            <div class="cqr-qr-wrap" id="cqr-wrap" style="display:none">
+              <img id="cqr-img" src="" alt="QR" />
+              <div class="cqr-qr-loading" id="cqr-loading"><div class="spin-sm"></div></div>
+            </div>
+            <div class="cqr-link-row" id="cqr-link-row" style="display:none">
+              <span class="cqr-link-url" id="cqr-link-url"></span>
+              <button class="lbtn copy" id="cqr-copy-btn">Copy</button>
+              <button class="lbtn open" onclick="window.open(document.getElementById('cqr-link-url').textContent,'_blank','noopener')">Mở ↗</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 let ACCOUNTS=[], BANK_MAP={}, API_BANKS=[], selected=null, debounceTimer=null, currentUrl="";
@@ -752,6 +905,136 @@ document.getElementById("confirm-ok-btn").addEventListener("click",()=>{
 
 
 
+
+
+// ========== CUSTOM QR ==========
+let cqrBank=null, cqrTimer=null, cqrUrl="";
+
+function openCustomQR(){
+  document.getElementById("cqr-backdrop").classList.add("open");
+  cqrFilterBank("");
+}
+function closeCustomQR(){
+  document.getElementById("cqr-backdrop").classList.remove("open");
+}
+document.addEventListener("click",e=>{
+  if(e.target===document.getElementById("cqr-backdrop")) closeCustomQR();
+  if(!e.target.closest(".cqr-bank-search-wrap"))
+    document.getElementById("cqr-bank-results").classList.remove("show");
+});
+
+function cqrFilterBank(q){
+  const res=document.getElementById("cqr-bank-results");
+  const list=q.trim()?
+    API_BANKS.filter(b=>
+      String(b["data__code"]||"").toLowerCase().includes(q.toLowerCase())||
+      String(b["data__name"]||"").toLowerCase().includes(q.toLowerCase())||
+      String(b["data__shortName"]||"").toLowerCase().includes(q.toLowerCase())||
+      String(b["data__bin"]||"").includes(q)
+    ):API_BANKS;
+  res.innerHTML="";
+  list.slice(0,40).forEach(b=>{
+    const d=document.createElement("div");
+    d.className="cqr-bank-item";
+    d.innerHTML=`<img src="${b["data__logo"]||""}" alt="" onerror="this.style.display='none'" /><span class="bi-name">${b["data__code"]||""} – ${b["data__shortName"]||""}</span><span class="bi-bin">${b["data__bin"]||""}</span>`;
+    d.onclick=()=>cqrSelectBank(b);
+    res.appendChild(d);
+  });
+  res.classList.add("show");
+}
+
+function cqrSelectBank(b){
+  cqrBank=b;
+  document.getElementById("cqr-bank-results").classList.remove("show");
+  document.getElementById("cqr-bank-picker").style.display="none";
+  const sel=document.getElementById("cqr-sel-bank");
+  sel.classList.add("show");
+  document.getElementById("cqr-sel-logo").src=b["data__logo"]||"";
+  document.getElementById("cqr-sel-name").textContent=`${b["data__code"]} – ${b["data__shortName"]||b["data__name"]}`;
+  document.getElementById("cqr-sel-bin").textContent=`BIN: ${b["data__bin"]}`;
+  cqrGenerate();
+}
+
+function cqrChangeBank(){
+  cqrBank=null;
+  document.getElementById("cqr-sel-bank").classList.remove("show");
+  document.getElementById("cqr-bank-picker").style.display="block";
+  document.getElementById("cqr-bank-search").value="";
+  cqrFilterBank("");
+}
+
+function cqrSchedule(){
+  clearTimeout(cqrTimer);
+  cqrTimer=setTimeout(cqrGenerate, 120);
+}
+
+function cqrGenerate(){
+  if(!cqrBank) return;
+  const stk=document.getElementById("cqr-stk").value.trim();
+  if(!stk) return;
+  const name=document.getElementById("cqr-name").value.trim();
+  const amount=document.getElementById("cqr-amount").value.trim();
+  const template=document.getElementById("cqr-template").value||"BdT8CDO";
+  const memo=document.getElementById("cqr-memo").value.trim();
+  const bin=String(cqrBank["data__bin"]);
+
+  let url=`https://img.vietqr.io/image/${bin}-${stk}-${template}.png`;
+  const p=[];
+  if(amount) p.push(`amount=${encodeURIComponent(amount)}`);
+  if(memo)   p.push(`addInfo=${encodeURIComponent(memo)}`);
+  if(name)   p.push(`accountName=${encodeURIComponent(name)}`);
+  if(p.length) url+="?"+p.join("&");
+
+  if(url===cqrUrl) return;
+  cqrUrl=url;
+
+  document.getElementById("cqr-qr-head").style.display="flex";
+  document.getElementById("cqr-h-logo").src=cqrBank["data__logo"]||"";
+  document.getElementById("cqr-h-name").textContent=`${cqrBank["data__code"]} – ${cqrBank["data__shortName"]||""}`;
+  document.getElementById("cqr-h-stk").textContent=`STK: ${stk}`;
+  document.getElementById("cqr-h-amt").textContent=amount?Number(amount).toLocaleString("vi-VN")+" ₫":"";
+
+  document.getElementById("cqr-empty").style.display="none";
+  document.getElementById("cqr-wrap").style.display="block";
+  document.getElementById("cqr-link-row").style.display="flex";
+
+  const img=document.getElementById("cqr-img");
+  const loading=document.getElementById("cqr-loading");
+  loading.classList.add("show");
+  img.classList.remove("visible");
+
+  const reqId=++cqrGenerate._id;
+  const tmp=new Image();
+  tmp.onload=()=>{
+    if(reqId!==cqrGenerate._id)return;
+    img.src=url; img.classList.add("visible");
+    loading.classList.remove("show");
+  };
+  tmp.onerror=()=>{if(reqId!==cqrGenerate._id)return; loading.classList.remove("show");};
+  tmp.src=url;
+
+  document.getElementById("cqr-link-url").textContent=url;
+  const cb=document.getElementById("cqr-copy-btn");
+  cb.textContent="Copy"; cb.classList.remove("copied");
+  cb.onclick=()=>navigator.clipboard.writeText(url).then(()=>{
+    cb.textContent="✓ OK"; cb.classList.add("copied");
+    setTimeout(()=>{cb.textContent="Copy";cb.classList.remove("copied");},1800);
+  });
+}
+cqrGenerate._id=0;
+
+function cqrReset(){
+  cqrBank=null; cqrUrl="";
+  ["cqr-bank-search","cqr-stk","cqr-name","cqr-amount","cqr-memo"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("cqr-template").value="BdT8CDO";
+  document.getElementById("cqr-sel-bank").classList.remove("show");
+  document.getElementById("cqr-bank-picker").style.display="block";
+  document.getElementById("cqr-qr-head").style.display="none";
+  document.getElementById("cqr-wrap").style.display="none";
+  document.getElementById("cqr-link-row").style.display="none";
+  document.getElementById("cqr-empty").style.display="flex";
+  cqrFilterBank("");
+}
 
 // ========== TOAST ==========
 function showToast(msg){
