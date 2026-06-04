@@ -236,12 +236,25 @@
     .spin-sm{width:22px;height:22px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .65s linear infinite}
     .link-row{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 0}
     .link-url{display:none}
-    .lbtn{flex-shrink:0;padding:7px 18px;font-size:.78rem;font-weight:600;border:none;border-radius:7px;cursor:pointer;transition:background .13s;font-family:inherit}
+    .lbtn{flex-shrink:0;padding:7px 14px;font-size:.78rem;font-weight:600;border:none;border-radius:7px;cursor:pointer;transition:all .13s;font-family:inherit}
     .lbtn.copy{background:var(--accent-l);color:var(--accent)}
     .lbtn.open{background:var(--accent);color:#fff}
+    .lbtn.save{background:var(--green-l);color:var(--green)}
+    .lbtn.share{background:#fff3e0;color:#e65100}
     .lbtn.copy:hover{background:#dde4fc}
     .lbtn.open:hover{background:var(--accent-d)}
+    .lbtn.save:hover{background:#c8e6c9}
+    .lbtn.share:hover{background:#ffe0b2}
     .lbtn.copied{background:var(--green-l);color:var(--green)}
+    .lbtn:active{transform:scale(.96)}
+    /* Amount history chips */
+    .amt-chip{padding:3px 10px;font-size:.72rem;font-weight:600;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);cursor:pointer;transition:all .13s;font-family:'DM Mono',monospace;white-space:nowrap}
+    .amt-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+    .amt-chip:active{transform:scale(.95)}
+    /* Copy STK button on bank card */
+    .bc-copy-stk{padding:2px 7px;font-size:.65rem;font-weight:600;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--sub);cursor:pointer;font-family:inherit;transition:all .13s;opacity:0;flex-shrink:0}
+    .bank-card:hover .bc-copy-stk{opacity:1}
+    .bank-card.active .bc-copy-stk{opacity:1;border-color:#c5cef8;color:var(--accent)}
     .refresh-btn{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sub);transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.06)}
     .refresh-btn:hover{border-color:var(--accent);color:var(--accent);transform:rotate(20deg)}
     .refresh-btn.spinning svg{animation:spin .5s linear}
@@ -336,7 +349,7 @@
       .local-qr-bar{margin-top:0}
       #toast{bottom:calc(env(safe-area-inset-bottom,0px)+64px)}
       /* Nút Copy / Mở to hơn */
-      .lbtn{padding:13px 28px !important;font-size:.92rem !important;border-radius:11px !important}
+      .lbtn{padding:13px 18px !important;font-size:.9rem !important;border-radius:11px !important}
       /* Refresh btn to hơn */
       .refresh-btn{width:40px !important;height:40px !important}
       .mob-tabs{
@@ -400,7 +413,11 @@
             </div>
           </div>
           <div id="bank-picker">
-            <input type="text" id="bank-search" placeholder="Tìm ngân hàng…" autocomplete="off" />
+            <div style="position:relative">
+              <input type="text" id="bank-search" placeholder="Tìm ngân hàng…" autocomplete="off" />
+              <button id="bank-search-clear" onclick="clearBankSearch()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--sub);font-size:1.1rem;line-height:1;padding:2px 4px;border-radius:4px" title="Xoá tìm kiếm">✕</button>
+            </div>
+            <div id="bank-search-count" style="font-size:.7rem;color:var(--sub);margin-bottom:6px;display:none"></div>
             <div class="bank-list-wrap" id="bank-list-wrap">
               <div id="bank-list"></div>
             </div>
@@ -411,7 +428,13 @@
           <div class="input-row">
             <div class="field">
               <label>Số tiền (VNĐ)</label>
-              <input type="number" id="amount" placeholder=" " min="0" />
+              <div style="position:relative">
+                <input type="text" id="amount-display" placeholder="0 ₫" inputmode="numeric" autocomplete="off" style="padding-right:32px" />
+                <button id="amount-clear" onclick="clearAmount()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--sub);font-size:1rem;line-height:1;padding:2px 4px;border-radius:4px">✕</button>
+              </div>
+              <input type="hidden" id="amount" />
+              <!-- Lịch sử số tiền -->
+              <div id="amount-history" style="display:none;margin-top:5px;display:flex;flex-wrap:wrap;gap:4px"></div>
             </div>
             <div class="field">
                 <label>Template</label>
@@ -457,7 +480,9 @@
           </div>
           <div class="link-row" id="link-row" style="display:none">
             <span class="link-url" id="link-url" style="display:none"></span>
-            <button class="lbtn copy" id="copy-btn">Copy</button>
+            <button class="lbtn copy" id="copy-btn">Copy link</button>
+            <button class="lbtn save" id="save-btn">⬇ Lưu ảnh</button>
+            <button class="lbtn share" id="share-btn" style="display:none">↑ Chia sẻ</button>
             <button class="lbtn open" id="open-btn">Mở ↗</button>
           </div>
         </div>
@@ -702,8 +727,14 @@ function reloadListBank(){
     });
   document.getElementById("bank-count").textContent=ACCOUNTS.length+" tài khoản";
   renderCards(ACCOUNTS);
-  // Auto chọn tài khoản đầu tiên
-  if(ACCOUNTS.length>0) selectAccount(ACCOUNTS[0]);
+  // Khôi phục tài khoản đã chọn lần trước, nếu không có thì chọn đầu tiên
+  if(ACCOUNTS.length>0){
+    try{
+      const saved=JSON.parse(localStorage.getItem('vqr_last_sel')||'null');
+      const found=saved&&ACCOUNTS.find(a=>a.bin===saved.bin&&a.stk===saved.stk);
+      selectAccount(found||ACCOUNTS[0]);
+    }catch(e){ selectAccount(ACCOUNTS[0]); }
+  }
 }
 
 // ========== QR TAB ==========
@@ -721,7 +752,15 @@ function renderCards(list){
         <div class="bc-sub">STK: ${acc.stk}</div>
         ${acc.nameAc?`<div class="bc-nameac">👤 ${acc.nameAc}</div>`:''}
       </div>
+      <button class="bc-copy-stk" title="Copy STK">Copy STK</button>
       <div class="check"></div>`;
+    d.querySelector('.bc-copy-stk').addEventListener('click', e => {
+      e.stopPropagation();
+      navigator.clipboard.writeText(acc.stk).then(()=>{
+        const btn = e.target; btn.textContent='✓'; btn.style.color='var(--green)';
+        setTimeout(()=>{btn.textContent='Copy STK';btn.style.color='';},1500);
+      });
+    });
     d.addEventListener("click",()=>selectAccount(acc));
     el.appendChild(d);
   });
@@ -747,19 +786,15 @@ function selectAccount(acc){
   if(window.innerWidth<=720) setTimeout(()=>mobSwitch(1),80);
 }
 
+
 document.getElementById("bank-search").addEventListener("input",function(){
-  const q=this.value.toLowerCase().trim();
-  renderCards(!q?ACCOUNTS:ACCOUNTS.filter(a=>
-    a.label.toLowerCase().includes(q)||a.code.toLowerCase().includes(q)||
-    a.shortName.toLowerCase().includes(q)||a.stk.includes(q)
-  ));
+  // handled by new listener below - kept for safety no-op
 });
 
 function scheduleQR(delay=80){clearTimeout(debounceTimer);debounceTimer=setTimeout(generateQR,delay);}
-["amount","memo"].forEach(id=>{
-  document.getElementById(id).addEventListener("input",()=>{if(selected)scheduleQR(120);});
-  document.getElementById(id).addEventListener("keydown",e=>{if(e.key==="Enter"&&selected){clearTimeout(debounceTimer);generateQR();}});
-});
+// memo only (amount now handled by amount-display)
+document.getElementById("memo").addEventListener("input",()=>{if(selected)scheduleQR(120);});
+document.getElementById("memo").addEventListener("keydown",e=>{if(e.key==="Enter"&&selected){clearTimeout(debounceTimer);generateQR();}});
 document.getElementById("template-select").addEventListener("change",()=>{if(selected){currentUrl="";generateQR();}});
 
 function generateQR(forceFresh=false){
@@ -1189,7 +1224,176 @@ function mobSwitch(idx){
 
 loadXLSX();
 
-// Bank list scroll fade
+// ========== AMOUNT FORMAT ==========
+const amountDisplay = document.getElementById('amount-display');
+const amountHidden  = document.getElementById('amount');
+const amountClear   = document.getElementById('amount-clear');
+
+function parseRawAmount(str){ return str.replace(/\D/g,''); }
+function formatAmount(raw){
+  if(!raw) return '';
+  return Number(raw).toLocaleString('vi-VN');
+}
+
+amountDisplay.addEventListener('input', function(){
+  const raw = parseRawAmount(this.value);
+  amountHidden.value = raw;
+  // Reformat với cursor giữ cuối
+  const formatted = raw ? formatAmount(raw) : '';
+  this.value = formatted ? formatted + ' ₫' : '';
+  amountClear.style.display = raw ? 'block' : 'none';
+  if(selected) scheduleQR(120);
+});
+
+amountDisplay.addEventListener('focus', function(){
+  // Bỏ ₫ để dễ nhập
+  const raw = amountHidden.value;
+  this.value = raw ? formatAmount(raw) : '';
+});
+
+amountDisplay.addEventListener('blur', function(){
+  const raw = amountHidden.value;
+  this.value = raw ? formatAmount(raw) + ' ₫' : '';
+  if(raw) saveAmountHistory(raw);
+});
+
+function clearAmount(){
+  amountDisplay.value=''; amountHidden.value='';
+  amountClear.style.display='none';
+  if(selected) scheduleQR(80);
+  amountDisplay.focus();
+}
+
+// Patch generateQR to use hidden input
+const _origScheduleQR = scheduleQR;
+
+// ========== AMOUNT HISTORY ==========
+const AMT_KEY = 'vqr_amt_history';
+function loadAmountHistory(){
+  try{ return JSON.parse(localStorage.getItem(AMT_KEY)||'[]'); }catch(e){ return []; }
+}
+function saveAmountHistory(raw){
+  if(!raw||Number(raw)<=0) return;
+  let hist = loadAmountHistory().filter(v=>v!==raw);
+  hist.unshift(raw);
+  hist = hist.slice(0,6);
+  try{ localStorage.setItem(AMT_KEY, JSON.stringify(hist)); }catch(e){}
+  renderAmountHistory();
+}
+function renderAmountHistory(){
+  const hist = loadAmountHistory();
+  const wrap = document.getElementById('amount-history');
+  if(!hist.length){ wrap.style.display='none'; return; }
+  wrap.style.display='flex';
+  wrap.innerHTML = hist.map(v=>`<button class="amt-chip" data-val="${v}">${formatAmount(v)} ₫</button>`).join('');
+  wrap.querySelectorAll('.amt-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const raw = btn.dataset.val;
+      amountHidden.value = raw;
+      amountDisplay.value = formatAmount(raw)+' ₫';
+      amountClear.style.display = 'block';
+      if(selected) scheduleQR(80);
+    });
+  });
+}
+renderAmountHistory();
+
+// ========== SEARCH CLEAR + COUNT ==========
+const bankSearchInput = document.getElementById('bank-search');
+const bankSearchClear = document.getElementById('bank-search-clear');
+const bankSearchCount = document.getElementById('bank-search-count');
+
+bankSearchInput.addEventListener('input', function(){
+  const q = this.value.toLowerCase().trim();
+  bankSearchClear.style.display = q ? 'block' : 'none';
+  const filtered = !q ? ACCOUNTS : ACCOUNTS.filter(a=>
+    a.label.toLowerCase().includes(q)||a.code.toLowerCase().includes(q)||
+    a.shortName.toLowerCase().includes(q)||a.stk.includes(q)
+  );
+  if(q){
+    bankSearchCount.style.display='block';
+    bankSearchCount.textContent = `${filtered.length} / ${ACCOUNTS.length} tài khoản`;
+  } else {
+    bankSearchCount.style.display='none';
+  }
+  renderCards(filtered);
+});
+
+function clearBankSearch(){
+  bankSearchInput.value='';
+  bankSearchClear.style.display='none';
+  bankSearchCount.style.display='none';
+  renderCards(ACCOUNTS);
+  bankSearchInput.focus();
+}
+
+// ========== SAVE QR IMAGE ==========
+document.getElementById('save-btn').addEventListener('click', async function(){
+  const url = document.getElementById('link-url').textContent;
+  if(!url) return;
+  const btn = this;
+  btn.textContent='⏳ Đang tải…'; btn.disabled=true;
+  try{
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const name = selected ? `QR_${selected.label}_${selected.stk}`.replace(/\s/g,'_') : 'QR_VietQR';
+    a.download = name+'.png';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    btn.textContent='✓ Đã lưu'; btn.style.background='var(--green-l)'; btn.style.color='var(--green)';
+    setTimeout(()=>{ btn.textContent='⬇ Lưu ảnh'; btn.style.background=''; btn.style.color=''; btn.disabled=false; },2000);
+  }catch(e){
+    btn.textContent='⬇ Lưu ảnh'; btn.disabled=false;
+    showToast('Lỗi tải ảnh, thử nút Mở ↗ rồi lưu thủ công');
+  }
+});
+
+// ========== SHARE QR (Web Share API) ==========
+(function(){
+  const shareBtn = document.getElementById('share-btn');
+  if(navigator.share) shareBtn.style.display='flex';
+  shareBtn.addEventListener('click', async ()=>{
+    const url = document.getElementById('link-url').textContent;
+    if(!url) return;
+    try{
+      // Thử share file ảnh trước
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const file = new File([blob], 'VietQR.png', {type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({ files:[file], title:'VietQR', text: selected?`${selected.label} – STK: ${selected.stk}`:'Mã QR thanh toán' });
+      } else {
+        await navigator.share({ title:'VietQR', url });
+      }
+    }catch(e){ if(e.name!=='AbortError') showToast('Không thể chia sẻ'); }
+  });
+})();
+
+// ========== REMEMBER LAST SELECTED ==========
+const SEL_KEY = 'vqr_last_sel';
+function saveLastSelected(acc){
+  try{ localStorage.setItem(SEL_KEY, JSON.stringify({bin:acc.bin, stk:acc.stk})); }catch(e){}
+}
+function restoreLastSelected(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(SEL_KEY)||'null');
+    if(!saved) return false;
+    const acc = ACCOUNTS.find(a=>a.bin===saved.bin&&a.stk===saved.stk);
+    if(acc){ selectAccount(acc); return true; }
+  }catch(e){}
+  return false;
+}
+
+// Patch selectAccount to save
+const _origSelectAccount = selectAccount;
+selectAccount = function(acc){
+  _origSelectAccount(acc);
+  saveLastSelected(acc);
+};
+
+// ========== BANK LIST SCROLL FADE ==========
 (function(){
   var list = document.getElementById('bank-list');
   var wrap = document.getElementById('bank-list-wrap');
@@ -1201,7 +1405,7 @@ loadXLSX();
     wrap.classList.toggle('scrolled', scrolled);
   }
   list.addEventListener('scroll', checkScroll, {passive:true});
-  var obs = new MutationObserver(checkScroll);
+  var obs = new MutationObserver(()=>{ checkScroll(); });
   obs.observe(list, {childList:true});
   checkScroll();
 })();
