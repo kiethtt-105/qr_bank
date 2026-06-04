@@ -350,13 +350,12 @@
       .field input,.field select{padding:11px 12px !important;font-size:.9rem !important;border-radius:10px !important}
       .field label{font-size:.78rem !important;margin-bottom:2px !important}
 
-      /* Ẩn Template trên mobile (ít dùng) */
-      .field-template-wrap{display:none !important}
-
       /* input-row dọc */
       .input-row{flex-direction:row !important;gap:8px !important}
-      .input-row > .field-template-wrap{display:none !important}
-      .input-row > .field:first-child{flex:1}
+      .input-row > .field:first-child{flex:2}
+      /* Template hiện lại nhưng nhỏ gọn */
+      .field-template-wrap{display:flex !important;flex:1 !important}
+      .field-template-wrap select{padding:11px 8px !important;font-size:.8rem !important}
 
       .right{width:100vw;flex-shrink:0;height:100%;overflow-y:auto;padding:12px 12px calc(env(safe-area-inset-bottom,0px)+12px);align-items:stretch}
       .qr-shell{width:100%;max-width:100%}
