@@ -5,6 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VietQR Generator</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23fff'/%3E%3Cpolygon points='4,6 12,6 16,15 20,6 28,6 16,26' fill='%23cc1f2b'/%3E%3Cpolygon points='4,6 7,6 16,22 25,6 28,6 16,26' fill='%23a01520'/%3E%3C/svg%3E" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="VietQR" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <script>
+  // Tạo apple-touch-icon động bằng canvas (iOS yêu cầu PNG thật)
+  (function(){
+    try {
+      var c = document.createElement('canvas');
+      c.width = 180; c.height = 180;
+      var ctx = c.getContext('2d');
+      // Nền trắng bo góc
+      var r = 36;
+      ctx.beginPath();
+      ctx.moveTo(r,0); ctx.lineTo(180-r,0);
+      ctx.quadraticCurveTo(180,0,180,r);
+      ctx.lineTo(180,180-r); ctx.quadraticCurveTo(180,180,180-r,180);
+      ctx.lineTo(r,180); ctx.quadraticCurveTo(0,180,0,180-r);
+      ctx.lineTo(0,r); ctx.quadraticCurveTo(0,0,r,0);
+      ctx.closePath();
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      // Chữ V đỏ
+      ctx.fillStyle = '#cc1f2b';
+      ctx.beginPath();
+      ctx.moveTo(22, 32); ctx.lineTo(62, 32);
+      ctx.lineTo(90, 106); ctx.lineTo(118, 32);
+      ctx.lineTo(158, 32); ctx.lineTo(90, 152);
+      ctx.closePath();
+      ctx.fill();
+      // Chữ V bóng tối (lớp trong)
+      ctx.fillStyle = '#a01520';
+      ctx.beginPath();
+      ctx.moveTo(22,32); ctx.lineTo(36,32);
+      ctx.lineTo(90,130); ctx.lineTo(144,32);
+      ctx.lineTo(158,32); ctx.lineTo(90,152);
+      ctx.closePath();
+      ctx.fill();
+      // Thêm link tag
+      var link = document.createElement('link');
+      link.rel = 'apple-touch-icon';
+      link.href = c.toDataURL('image/png');
+      document.head.appendChild(link);
+    } catch(e){}
+  })();
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
@@ -449,7 +494,7 @@
 <div class="cqr-backdrop" id="cqr-backdrop">
   <div class="cqr-modal">
     <div class="cqr-modal-head">
-      <h2>✨ Tạo QR tùy chỉnh</h2>
+      <h2>✨ TẠO MÃ QR</h2>
       <button class="cqr-modal-close" onclick="closeCustomQR()">✕</button>
     </div>
     <div class="cqr-modal-body">
