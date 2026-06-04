@@ -235,16 +235,23 @@
         padding-bottom:env(safe-area-inset-bottom,16px)
       }
       .left{height:auto;overflow:visible;border-right:none;border-bottom:1px solid var(--border)}
-      .left-body{overflow:visible;padding-bottom:8px}
-      #bank-list{grid-template-columns:1fr 1fr;max-height:200px}
+      .left-body{overflow:visible;padding-bottom:8px;padding:10px}
+      #bank-list{display:flex;flex-direction:column;gap:4px;max-height:none}
+      .bank-card{background:var(--bg)}
       .right{
         min-height:auto;
         align-items:stretch;
-        padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 24px);
+        padding:12px 12px calc(env(safe-area-inset-bottom,0px) + 16px);
       }
       .qr-shell{width:100%;max-width:100%}
       .manage-content{padding:12px}
       #toast{bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+      .topbar{padding:0 12px;gap:6px;flex-wrap:wrap;height:auto;min-height:48px;padding-top:6px;padding-bottom:6px}
+      .topbar h1{font-size:.88rem}
+      .from-file{display:none}
+      .btn-custom-qr{font-size:.72rem;padding:5px 10px}
+      .local-qr-bar{margin-top:0}
+      .input-row{flex-direction:column;gap:8px}
     }
   </style>
 </head>
