@@ -317,62 +317,83 @@
         transition:transform .3s cubic-bezier(.4,0,.2,1);
       }
       .layout.show-right{transform:translateX(-50%)}
-      .left{width:100vw;flex-shrink:0;height:100%;overflow:hidden;border-right:none;display:flex;flex-direction:column}
-      .left-body{flex:1;overflow-y:auto;padding:12px 12px 20px;display:flex;flex-direction:column;gap:10px}
 
-      /* Bank list: chiều cao cố định ~3.5 thẻ, luôn hiện scrollbar */
-      .bank-list-wrap{border-radius:10px !important}
+      /* LEFT PANEL — 2 zone: danh sách + fields */
+      .left{width:100vw;flex-shrink:0;height:100%;overflow:hidden;border-right:none;display:flex;flex-direction:column;background:var(--bg)}
+      .left-body{
+        flex:1;overflow:hidden;
+        padding:10px 12px 0;
+        display:flex;flex-direction:column;gap:0;
+      }
+
+      /* Zone 1: search + bank list — chiếm phần trên */
+      #bank-picker{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+      #bank-search{
+        padding:10px 14px !important;font-size:.9rem !important;
+        border-radius:10px !important;margin-bottom:7px !important;
+        flex-shrink:0;
+      }
+      #bank-search-clear{right:12px !important}
+      #bank-search-count{flex-shrink:0}
+      .bank-list-wrap{
+        flex:1;min-height:0;
+        border-radius:10px !important;
+        overflow:hidden;
+      }
       #bank-list{
-        display:flex !important;flex-direction:column !important;gap:5px !important;
-        height:210px !important;max-height:210px !important;
+        display:flex !important;flex-direction:column !important;gap:4px !important;
+        height:100% !important;max-height:100% !important;
         overflow-y:scroll !important;overflow-x:hidden !important;
-        padding:5px 5px 5px 5px !important;
+        padding:5px !important;
         scroll-behavior:smooth;
         scrollbar-gutter:stable;
         -webkit-overflow-scrolling:touch;
       }
-      /* Scrollbar luôn hiện trên mobile */
       #bank-list::-webkit-scrollbar{width:5px !important;display:block !important}
       #bank-list::-webkit-scrollbar-thumb{background:#c5cef8 !important;border-radius:4px !important}
-      #bank-list::-webkit-scrollbar-track{background:var(--bg) !important;border-radius:4px !important}
+      #bank-list::-webkit-scrollbar-track{background:var(--bg) !important}
 
-      /* Bank card to hơn */
-      .bank-card{padding:11px 12px !important;border-radius:10px !important;gap:10px !important}
-      .bank-card img{width:36px !important;height:36px !important}
-      .bc-name{font-size:.88rem !important}
-      .bc-sub{font-size:.73rem !important}
-      .bc-copy-stk{opacity:1 !important;font-size:.65rem !important;padding:3px 8px !important} /* luôn hiện trên mobile */
+      /* Bank card */
+      .bank-card{padding:10px 11px !important;border-radius:9px !important;gap:9px !important;background:var(--surface) !important}
+      .bank-card img{width:34px !important;height:34px !important}
+      .bc-name{font-size:.85rem !important}
+      .bc-sub{font-size:.72rem !important}
+      .bc-copy-stk{opacity:1 !important;font-size:.62rem !important;padding:3px 7px !important}
 
-      /* Search */
-      #bank-search{padding:11px 14px !important;font-size:.9rem !important;border-radius:11px !important;margin-bottom:8px !important}
-
-      /* Fields gọn hơn */
-      .field input,.field select{padding:11px 12px !important;font-size:.9rem !important;border-radius:10px !important}
-      .field label{font-size:.78rem !important;margin-bottom:2px !important}
-
-      /* input-row dọc */
+      /* Zone 2: fields card — cố định ở dưới */
+      .mob-fields-card{
+        flex-shrink:0;
+        background:var(--surface);
+        border-top:1px solid var(--border);
+        padding:10px 12px 12px;
+        display:flex;flex-direction:column;gap:8px;
+        margin:0 -12px;
+      }
       .input-row{flex-direction:row !important;gap:8px !important}
-      .input-row > .field:first-child{flex:2}
-      /* Template hiện lại nhưng nhỏ gọn */
+      .input-row>.field:first-child{flex:2}
       .field-template-wrap{display:flex !important;flex:1 !important}
-      .field-template-wrap select{padding:11px 8px !important;font-size:.8rem !important}
+      .field-template-wrap select{padding:9px 8px !important;font-size:.78rem !important}
+      .field input,.field select{padding:9px 11px !important;font-size:.85rem !important;border-radius:9px !important}
+      .field label{font-size:.73rem !important;margin-bottom:2px !important;color:var(--sub) !important}
+      /* Ẩn Tên chủ TK (readonly, ít cần thao tác) */
+      .field-nameac-wrap{display:none !important}
 
+      /* RIGHT PANEL */
       .right{width:100vw;flex-shrink:0;height:100%;overflow-y:auto;padding:12px 12px calc(env(safe-area-inset-bottom,0px)+12px);align-items:stretch}
       .qr-shell{width:100%;max-width:100%}
-      .topbar{padding:0 12px;gap:6px;height:48px}
-      .topbar h1{font-size:.85rem}
-      .from-file{display:none}
-      .btn-custom-qr{font-size:.72rem;padding:7px 10px;border-radius:8px}
-      #toast{bottom:calc(env(safe-area-inset-bottom,0px)+64px)}
-
-      /* Nút QR to hơn */
-      .lbtn{padding:12px 14px !important;font-size:.85rem !important;border-radius:10px !important}
-      .link-row{gap:6px !important;flex-wrap:wrap !important;justify-content:center !important}
-      .refresh-btn{width:38px !important;height:38px !important}
-
-      /* QR shell compact */
       .qr-header{padding:10px 14px !important}
-      .qr-body{padding:14px 14px 12px !important;gap:10px !important}
+      .qr-body{padding:12px 12px 10px !important;gap:10px !important}
+      .lbtn{padding:11px 14px !important;font-size:.83rem !important;border-radius:9px !important}
+      .link-row{gap:6px !important;flex-wrap:wrap !important;justify-content:center !important}
+      .refresh-btn{width:36px !important;height:36px !important}
+
+      /* Topbar */
+      .topbar{padding:0 12px;gap:6px;height:48px}
+      .topbar h1{font-size:.82rem}
+      .from-file{display:none}
+      .btn-custom-qr{font-size:.7rem;padding:6px 9px;border-radius:8px}
+
+      #toast{bottom:calc(env(safe-area-inset-bottom,0px)+64px)}
 
       .mob-tabs{
         display:flex;height:56px;background:var(--surface);
@@ -445,8 +466,7 @@
             </div>
           </div>
         </div>
-        <div>
-          <div class="section-label">Chi tiết</div>
+        <div class="mob-fields-card">
           <div class="input-row">
             <div class="field">
               <label>Số tiền (VNĐ)</label>
@@ -455,7 +475,6 @@
                 <button id="amount-clear" onclick="clearAmount()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:var(--sub);font-size:1rem;line-height:1;padding:2px 4px;border-radius:4px">✕</button>
               </div>
               <input type="hidden" id="amount" />
-              <!-- Lịch sử số tiền -->
               <div id="amount-history" style="display:none;margin-top:5px;display:flex;flex-wrap:wrap;gap:4px"></div>
             </div>
             <div class="field field-template-wrap">
@@ -464,14 +483,14 @@
                 </select>
             </div>
           </div>
-        </div>
-        <div class="field">
-          <label>Tên chủ tài khoản </label>
-          <input type="text" id="account-name"  class="readonly-field" readonly />
-        </div>
-        <div class="field">
-          <label>Nội dung chuyển khoản</label>
-          <input type="text" id="memo"  />
+          <div class="field field-nameac-wrap">
+            <label>Tên chủ tài khoản</label>
+            <input type="text" id="account-name" class="readonly-field" readonly />
+          </div>
+          <div class="field">
+            <label>Nội dung chuyển khoản</label>
+            <input type="text" id="memo" />
+          </div>
         </div>
       </div>
     </div>
