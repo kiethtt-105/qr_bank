@@ -2,182 +2,179 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>VietQR Generator</title>
   <link rel="icon" type="image/jpeg" href="icon.jpg" />
   <link rel="apple-touch-icon" href="icon.jpg" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="VietQR" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
-      --bg: #f0f2f8;
+      --bg: #f4f6fb;
       --surface: #ffffff;
-      --surface2: #f7f8fc;
-      --border: #e4e8f4;
-      --border2: #d0d6ed;
+      --surface2: #f8f9fd;
+      --surface3: #eef1f8;
+      --border: #e3e8f4;
+      --border2: #ccd3ea;
       --accent: #2952e3;
       --accent-l: #eef2ff;
       --accent-d: #1e3fc2;
-      --accent-glow: rgba(41,82,227,.15);
-      --text: #0f1629;
-      --sub: #6b7899;
-      --sub2: #9aa3be;
+      --accent-glow: rgba(41,82,227,.12);
+      --text: #0d1524;
+      --sub: #64718f;
+      --sub2: #98a3bd;
       --green: #0d7a4e;
       --green-l: #e6f7f0;
       --red: #c0392b;
       --red-l: #fdecea;
-      --orange: #d4670a;
+      --orange: #c96a00;
       --orange-l: #fff3e0;
-      --radius: 12px;
-      --radius-sm: 8px;
-      --shadow: 0 4px 24px rgba(15,22,41,.08);
-      --shadow-lg: 0 8px 40px rgba(15,22,41,.12);
-      --font: 'Plus Jakarta Sans', sans-serif;
-      --mono: 'JetBrains Mono', monospace;
+      --r: 14px;
+      --r-sm: 9px;
+      --r-lg: 20px;
+      --sh: 0 2px 16px rgba(13,21,36,.07);
+      --sh-lg: 0 8px 40px rgba(13,21,36,.11);
+      --font: 'DM Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+      --topbar-h: 56px;
+      --mob-tab-h: 56px;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { height: 100%; height: -webkit-fill-available; scroll-behavior: smooth; }
-
+    html { height: 100%; height: -webkit-fill-available; }
     body {
       font-family: var(--font);
       background: var(--bg);
       color: var(--text);
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
-      min-height: 100dvh;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      -webkit-text-size-adjust: 100%;
     }
 
-    /* ─── LOADING ─── */
+    /* ── LOADING ── */
     #loading-overlay {
-      position: fixed; inset: 0;
+      position: fixed; inset: 0; z-index: 999;
       background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 16px; z-index: 999;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
     }
     #loading-overlay.hidden { display: none; }
     .spinner {
-      width: 36px; height: 36px;
+      width: 34px; height: 34px;
       border: 3px solid var(--border2);
       border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin .7s linear infinite;
+      animation: spin .65s linear infinite;
     }
-    .loading-text { font-size: .85rem; color: var(--sub); font-weight: 500; }
+    .loading-text { font-size: .82rem; color: var(--sub); font-weight: 500; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ─── TOPBAR ─── */
+    /* ── TOPBAR ── */
     .topbar {
-      height: 56px;
+      height: var(--topbar-h);
+      flex-shrink: 0;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center;
-      padding: 0 20px; gap: 12px;
-      flex-shrink: 0;
+      padding: 0 16px; gap: 10px;
       box-shadow: 0 1px 0 var(--border);
     }
     .topbar-logo {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 9px;
       text-decoration: none; flex-shrink: 0;
     }
     .logo-mark {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, #cc1f2b 0%, #e8424e 100%);
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, #c91f2b 0%, #e84452 100%);
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(200,31,43,.28);
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(204,31,43,.3);
     }
-    .logo-mark svg { width: 18px; height: 18px; }
-    .topbar h1 {
-      font-size: .95rem; font-weight: 800;
-      color: var(--text); letter-spacing: -.02em;
+    .logo-mark svg { width: 16px; height: 16px; }
+    .topbar-title {
+      font-size: .92rem; font-weight: 800;
+      color: var(--text); letter-spacing: -.025em;
+      white-space: nowrap;
     }
-    .topbar h1 span { color: var(--accent); }
-
+    .topbar-title span { color: var(--accent); }
     .chip {
       background: var(--accent-l); color: var(--accent);
-      font-size: .72rem; font-weight: 700;
-      padding: 3px 10px; border-radius: 20px;
+      font-size: .68rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
       font-family: var(--mono);
-      border: 1px solid rgba(41,82,227,.15);
+      border: 1px solid rgba(41,82,227,.13);
+      white-space: nowrap;
     }
     .from-file {
-      margin-left: auto; font-size: .75rem; color: var(--sub2);
-      display: flex; align-items: center; gap: 5px;
+      font-size: .72rem; color: var(--sub2);
+      display: flex; align-items: center; gap: 4px;
+      white-space: nowrap;
     }
     .from-file span { color: var(--sub); font-weight: 600; }
-
-    .btn-topbar {
-      display: flex; align-items: center; gap: 6px;
-      padding: 7px 14px;
-      border: none; border-radius: var(--radius-sm);
-      font-family: var(--font); font-size: .78rem; font-weight: 700;
-      cursor: pointer; transition: all .15s;
-      white-space: nowrap; flex-shrink: 0;
+    .topbar-spacer { flex: 1; }
+    .topbar-actions { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+    .btn-top {
+      display: flex; align-items: center; gap: 5px;
+      padding: 7px 13px;
+      border: none; border-radius: var(--r-sm);
+      font-family: var(--font); font-size: .76rem; font-weight: 700;
+      cursor: pointer; transition: all .14s;
+      white-space: nowrap;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
-    .btn-topbar-primary {
+    .btn-top-primary {
       background: var(--accent); color: #fff;
       box-shadow: 0 2px 8px var(--accent-glow);
     }
-    .btn-topbar-primary:hover { background: var(--accent-d); box-shadow: 0 4px 12px var(--accent-glow); }
-    .btn-topbar-momo {
+    .btn-top-primary:hover { background: var(--accent-d); }
+    .btn-top-momo {
       background: linear-gradient(135deg, #a01f6b, #c42b80);
       color: #fff;
-      box-shadow: 0 2px 8px rgba(160,31,107,.25);
+      box-shadow: 0 2px 8px rgba(160,31,107,.2);
     }
-    .btn-topbar-momo:hover { opacity: .9; }
+    .btn-top-momo:hover { opacity: .88; }
 
-    /* ─── MAIN LAYOUT ─── */
-    #tab-qr { display: flex; flex: 1; overflow: hidden; min-height: 0; }
-    #tab-qr.show { display: flex; }
-
+    /* ── MAIN CONTENT ── */
+    #tab-qr {
+      flex: 1; min-height: 0;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
     .layout {
+      flex: 1; min-height: 0;
       display: grid;
-      grid-template-columns: 340px 1fr;
-      height: calc(100dvh - 56px);
-      overflow: hidden; flex: 1;
+      grid-template-columns: 320px 1fr;
+      overflow: hidden;
     }
 
-    /* ─── LEFT PANEL ─── */
+    /* ── LEFT PANEL ── */
     .left {
       background: var(--surface);
       border-right: 1px solid var(--border);
       display: flex; flex-direction: column;
-      overflow: hidden;
+      overflow: hidden; min-height: 0;
     }
-    .left-body {
-      flex: 1; overflow-y: auto;
-      padding: 14px; display: flex;
-      flex-direction: column; gap: 10px;
-      scrollbar-width: thin;
-      scrollbar-color: #c9d3f0 transparent;
-    }
-    .left-body::-webkit-scrollbar { width: 4px; }
-    .left-body::-webkit-scrollbar-thumb { background: #c9d3f0; border-radius: 4px; }
-    .left-body::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-    .left-body::-webkit-scrollbar-track { background: transparent; }
-
     .section-label { display: none; }
-
-    /* Selected badge (hidden by default) */
     #selected-badge { display: none !important; }
 
-    /* ─── SEARCH ─── */
+    .left-search {
+      padding: 12px 12px 8px;
+      flex-shrink: 0;
+    }
     .search-wrap { position: relative; }
     #bank-search {
-      width: 100%; padding: 10px 36px 10px 14px;
+      width: 100%;
+      padding: 9px 34px 9px 12px;
       border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      font-family: var(--font); font-size: .875rem;
+      border-radius: var(--r-sm);
+      font-family: var(--font); font-size: .83rem;
       color: var(--text); background: var(--surface2);
       outline: none; transition: all .15s;
     }
@@ -189,121 +186,116 @@
     #bank-search::placeholder { color: var(--sub2); }
     #bank-search-clear {
       display: none; position: absolute;
-      right: 10px; top: 50%; transform: translateY(-50%);
+      right: 9px; top: 50%; transform: translateY(-50%);
       border: none; background: none;
       cursor: pointer; color: var(--sub2);
-      font-size: 1rem; padding: 4px; border-radius: 4px;
-      transition: color .12s;
+      font-size: .9rem; padding: 4px; border-radius: 4px;
     }
     #bank-search-clear:hover { color: var(--text); }
     #bank-search-count {
-      font-size: .7rem; color: var(--sub); margin-bottom: 4px; display: none;
-      font-weight: 500;
+      font-size: .68rem; color: var(--sub2); font-weight: 500;
+      padding: 2px 2px 6px; display: none;
     }
 
-    /* ─── BANK LIST ─── */
+    /* ── BANK LIST ── */
+    #bank-picker {
+      flex: 1; min-height: 0;
+      display: flex; flex-direction: column;
+      padding: 0 12px 8px;
+      overflow: hidden;
+    }
     .bank-list-wrap {
+      flex: 1; min-height: 0;
       position: relative;
       border: 1.5px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--r);
       background: var(--surface2);
       overflow: hidden;
     }
     .bank-list-wrap::after {
-      content: ''; position: absolute;
-      bottom: 0; left: 0; right: 6px; height: 28px;
-      background: linear-gradient(to bottom, transparent, var(--surface2));
-      border-radius: 0 0 10px 10px;
-      pointer-events: none; transition: opacity .2s; z-index: 1;
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 32px;
+      background: linear-gradient(transparent, var(--surface2));
+      pointer-events: none; z-index: 1; transition: opacity .2s;
+      border-radius: 0 0 12px 12px;
     }
     .bank-list-wrap.at-bottom::after { opacity: 0; }
     .bank-list-wrap::before {
-      content: ''; position: absolute;
-      top: 0; left: 0; right: 6px; height: 20px;
-      background: linear-gradient(to top, transparent, var(--surface2));
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 24px;
+      background: linear-gradient(var(--surface2), transparent);
       pointer-events: none; z-index: 1; opacity: 0; transition: opacity .2s;
     }
     .bank-list-wrap.scrolled::before { opacity: 1; }
-
     #bank-list {
       display: flex; flex-direction: column; gap: 3px;
-      height: 240px;
-      overflow-y: scroll; overflow-x: hidden;
+      height: 100%; overflow-y: auto; overflow-x: hidden;
       padding: 6px;
-      scroll-behavior: smooth;
-      scrollbar-gutter: stable;
       scrollbar-width: thin;
-      scrollbar-color: #c9d3f0 transparent;
+      scrollbar-color: #c5cee8 transparent;
+      -webkit-overflow-scrolling: touch;
     }
-    #bank-list::-webkit-scrollbar { width: 5px; }
-    #bank-list::-webkit-scrollbar-thumb { background: #c9d3f0; border-radius: 4px; }
-    #bank-list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-    #bank-list::-webkit-scrollbar-track { background: transparent; margin: 4px 0; }
+    #bank-list::-webkit-scrollbar { width: 4px; }
+    #bank-list::-webkit-scrollbar-thumb { background: #c5cee8; border-radius: 4px; }
+    #bank-list::-webkit-scrollbar-track { background: transparent; }
 
-    /* ─── BANK CARD ─── */
+    /* ── BANK CARD ── */
     .bank-card {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 10px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px;
+      border-radius: var(--r-sm);
       border: 1.5px solid transparent;
-      cursor: pointer; background: var(--surface);
-      transition: border-color .15s, background .15s, transform .12s, box-shadow .15s;
+      cursor: pointer;
+      background: var(--surface);
+      transition: border-color .14s, background .14s, box-shadow .14s;
       min-width: 0; flex-shrink: 0;
-      user-select: none;
-      touch-action: manipulation;
+      user-select: none; touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
     .bank-card:hover {
-      border-color: #c5d0f7;
+      border-color: #c2d0f5;
       background: var(--accent-l);
-      transform: translateX(2px);
-      box-shadow: 0 2px 8px var(--accent-glow);
+      box-shadow: 0 1px 6px var(--accent-glow);
     }
-    .bank-card:active { transform: translateX(2px) scale(.98); }
+    .bank-card:active { opacity: .85; }
     .bank-card.active {
       border-color: var(--accent);
       background: var(--accent-l);
-      box-shadow: 0 2px 12px var(--accent-glow);
+      box-shadow: 0 2px 10px var(--accent-glow);
     }
     .bank-card img {
-      width: 34px; height: 34px; object-fit: contain;
+      width: 32px; height: 32px; object-fit: contain;
       border-radius: 7px; flex-shrink: 0;
       border: 1px solid var(--border); background: #fff; padding: 3px;
     }
     .bc-info { min-width: 0; flex: 1; }
     .bc-name {
-      font-size: .82rem; font-weight: 700;
+      font-size: .8rem; font-weight: 700;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .bc-bank {
-      font-size: .7rem; color: var(--sub);
-      margin-top: 1px; white-space: nowrap;
-      overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.35;
     }
     .bc-sub {
-      font-size: .68rem; color: var(--sub);
+      font-size: .66rem; color: var(--sub);
       margin-top: 1px; font-family: var(--mono);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
+    .bc-bank { display: none; }
     .bc-nameac { display: none; }
     .bank-card.active .bc-sub { color: var(--accent); }
-    .bank-card.active .bc-bank { color: var(--accent-d); }
-
     .check {
-      width: 16px; height: 16px;
-      background: var(--accent);
-      border-radius: 50%;
+      width: 15px; height: 15px;
+      background: var(--accent); border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; opacity: 0; transition: opacity .15s;
     }
     .bank-card.active .check { opacity: 1; }
     .check::after {
-      content: ''; width: 4px; height: 7px;
+      content: ''; width: 4px; height: 6px;
       border-right: 2px solid #fff; border-bottom: 2px solid #fff;
       transform: rotate(40deg) translate(-1px,-1px);
     }
-
     .bc-copy-stk {
-      padding: 3px 8px; font-size: .64rem; font-weight: 600;
+      padding: 2px 7px; font-size: .6rem; font-weight: 600;
       border: 1px solid var(--border); border-radius: 5px;
       background: var(--surface); color: var(--sub);
       cursor: pointer; font-family: var(--font);
@@ -312,36 +304,35 @@
     .bank-card:hover .bc-copy-stk { opacity: 1; }
     .bank-card.active .bc-copy-stk { opacity: 1; border-color: #c5d0f7; color: var(--accent); }
 
-    /* ─── FIELDS CARD ─── */
+    /* ── FIELDS BOTTOM ── */
     .mob-fields-card {
+      flex-shrink: 0;
       background: var(--surface);
       border-top: 1px solid var(--border);
-      padding: 12px 14px 14px;
-      display: flex; flex-direction: column; gap: 10px;
+      padding: 10px 12px 12px;
+      display: flex; flex-direction: column; gap: 8px;
     }
-
-    .input-row { display: flex; gap: 10px; }
+    .input-row { display: flex; gap: 8px; }
     .input-row > * { flex: 1; }
-
-    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
     .field label {
-      font-size: .72rem; font-weight: 700;
-      color: var(--sub); text-transform: uppercase;
-      letter-spacing: .04em;
+      font-size: .66rem; font-weight: 700;
+      color: var(--sub2); text-transform: uppercase; letter-spacing: .05em;
     }
     .field input, .field select {
-      padding: 9px 12px;
+      padding: 8px 11px;
       border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-family: var(--font); font-size: .875rem;
+      border-radius: var(--r-sm);
+      font-family: var(--font); font-size: .83rem;
       color: var(--text); background: var(--surface2);
       outline: none; transition: all .15s;
       appearance: none; -webkit-appearance: none;
+      min-width: 0;
     }
     .field select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6'%3E%3Cpath d='M1 1l4.5 4 4.5-4' stroke='%236b7899' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 10px center;
-      padding-right: 28px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364718f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 9px center;
+      padding-right: 26px;
     }
     .field input:focus, .field select:focus {
       border-color: var(--accent);
@@ -351,110 +342,97 @@
     .field input::placeholder { color: var(--sub2); }
     .readonly-field {
       background: var(--accent-l) !important;
-      border-color: rgba(41,82,227,.2) !important;
+      border-color: rgba(41,82,227,.18) !important;
       color: var(--accent) !important;
       font-weight: 600; cursor: default;
     }
     .field-nameac-wrap { display: none; }
+    .field-template-wrap { max-width: 110px; }
 
-    /* Amount field special */
+    /* Amount */
     .amount-wrap { position: relative; }
-    .amount-wrap input { padding-right: 34px; }
+    .amount-wrap input { padding-right: 30px; }
     #amount-clear {
       display: none; position: absolute;
-      right: 10px; top: 50%; transform: translateY(-50%);
+      right: 8px; top: 50%; transform: translateY(-50%);
       border: none; background: none; cursor: pointer;
-      color: var(--sub2); font-size: 1rem; padding: 3px; border-radius: 4px;
+      color: var(--sub2); font-size: .9rem; padding: 3px; border-radius: 4px;
     }
-    #amount-clear:hover { color: var(--text); }
-
-    #amount-history {
-      display: none; flex-wrap: wrap; gap: 4px; margin-top: 4px;
-    }
+    #amount-history { display: none; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
     .amt-chip {
-      padding: 4px 10px; font-size: .71rem; font-weight: 600;
+      padding: 3px 9px; font-size: .67rem; font-weight: 600;
       border: 1.5px solid var(--border); border-radius: 20px;
       background: var(--surface); color: var(--sub);
       cursor: pointer; font-family: var(--mono);
       transition: all .12s; white-space: nowrap;
     }
     .amt-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-l); }
-    .amt-chip:active { transform: scale(.95); }
 
-    /* ─── RIGHT PANEL ─── */
+    /* ── RIGHT PANEL ── */
     .right {
       display: flex; align-items: center; justify-content: center;
-      padding: 24px; background: var(--bg);
+      padding: 20px; background: var(--bg);
       position: relative; overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
-
-    /* Subtle background pattern */
     .right::before {
       content: '';
       position: absolute; inset: 0;
-      background-image: radial-gradient(circle, #d8dff4 1px, transparent 1px);
-      background-size: 28px 28px;
-      opacity: .4; pointer-events: none;
+      background-image: radial-gradient(circle, #d1d8ef 1px, transparent 1px);
+      background-size: 26px 26px;
+      opacity: .35; pointer-events: none;
     }
-
     .refresh-btn {
-      position: absolute; top: 16px; right: 16px;
-      width: 34px; height: 34px; border-radius: var(--radius-sm);
+      position: absolute; top: 14px; right: 14px;
+      width: 32px; height: 32px; border-radius: var(--r-sm);
       background: var(--surface); border: 1.5px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--sub);
-      transition: all .15s;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06);
-      z-index: 2;
-      touch-action: manipulation;
+      cursor: pointer; color: var(--sub); transition: all .15s;
+      box-shadow: var(--sh); z-index: 2; touch-action: manipulation;
     }
     .refresh-btn:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 2px 8px var(--accent-glow); }
     .refresh-btn.spinning svg { animation: spin .5s linear; }
 
-    /* ─── QR CARD ─── */
+    /* ── QR CARD ── */
     .qr-shell {
       background: var(--surface);
-      border-radius: 20px;
-      box-shadow: 0 8px 48px rgba(15,22,41,.12), 0 1px 0 rgba(255,255,255,.8) inset;
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh-lg), 0 1px 0 rgba(255,255,255,.7) inset;
       overflow: hidden;
-      width: min(380px, 100%);
+      width: min(360px, 100%);
       display: flex; flex-direction: column;
       position: relative; z-index: 1;
       border: 1px solid var(--border);
     }
-
     .qr-header {
-      padding: 14px 16px;
+      padding: 13px 15px;
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center; gap: 10px;
-      background: var(--surface);
+      background: var(--surface2);
     }
     .qr-header img {
-      width: 32px; height: 32px; object-fit: contain;
+      width: 30px; height: 30px; object-fit: contain;
       border-radius: 7px; border: 1px solid var(--border);
       padding: 2px; background: #fff; flex-shrink: 0;
     }
-    .qh-name { font-size: .84rem; font-weight: 700; }
-    .qh-stk { font-size: .7rem; color: var(--sub); font-family: var(--mono); margin-top: 1px; }
+    .qh-name { font-size: .8rem; font-weight: 700; }
+    .qh-stk { font-size: .67rem; color: var(--sub); font-family: var(--mono); margin-top: 1px; }
     .qh-amount {
       margin-left: auto;
       background: var(--green-l); color: var(--green);
-      font-size: .75rem; font-weight: 700;
+      font-size: .72rem; font-weight: 700;
       padding: 3px 10px; border-radius: 20px;
       white-space: nowrap; font-family: var(--mono);
-      border: 1px solid rgba(13,122,78,.15);
+      border: 1px solid rgba(13,122,78,.12);
     }
-
     .qr-body {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 20px 20px 16px; gap: 14px;
+      padding: 18px 18px 14px; gap: 13px;
     }
-
     .qr-wrap {
       position: relative; width: 100%;
-      aspect-ratio: 1/1; max-width: 300px;
+      aspect-ratio: 1/1; max-width: 280px;
     }
     #qr-img {
       width: 100%; height: 100%; object-fit: contain;
@@ -462,98 +440,93 @@
       display: none; transition: opacity .2s;
     }
     #qr-img.visible { display: block; opacity: 1; }
-
     .qr-placeholder {
-      width: 100%; aspect-ratio: 1/1; max-width: 300px;
-      border-radius: 10px;
-      border: 2px dashed var(--border2);
+      width: 100%; aspect-ratio: 1/1; max-width: 280px;
+      border-radius: 10px; border: 2px dashed var(--border2);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 10px; color: var(--sub2); font-size: .82rem;
-      background: var(--surface2);
+      gap: 10px; color: var(--sub2); font-size: .8rem;
+      background: var(--surface2); text-align: center;
     }
-    .qr-placeholder .big-icon { font-size: 3rem; opacity: .18; }
-
+    .qr-placeholder .big-icon { font-size: 2.8rem; opacity: .15; }
     .qr-loading {
       position: absolute; inset: 0;
-      background: rgba(247,248,252,.88);
+      background: rgba(248,249,253,.88);
       border-radius: 10px;
       display: none; align-items: center; justify-content: center;
       backdrop-filter: blur(2px);
     }
     .qr-loading.show { display: flex; }
     .spin-sm {
-      width: 22px; height: 22px;
+      width: 20px; height: 20px;
       border: 2.5px solid var(--border2);
       border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin .65s linear infinite;
+      animation: spin .6s linear infinite;
     }
-
     .empty-state {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 10px; text-align: center; padding: 20px 0;
+      gap: 9px; text-align: center; padding: 16px 0;
     }
-    .empty-state .icon { font-size: 3rem; opacity: .15; }
-    .empty-state p { font-size: .83rem; color: var(--sub); line-height: 1.6; }
+    .empty-state .icon { font-size: 2.8rem; opacity: .13; }
+    .empty-state p { font-size: .8rem; color: var(--sub); line-height: 1.65; }
 
-    /* Action buttons row */
+    /* ── ACTION BUTTONS ── */
     .link-row {
       width: 100%; display: flex; align-items: center;
-      justify-content: center; gap: 6px;
-      padding: 4px 0; flex-wrap: wrap;
+      justify-content: center; gap: 5px; flex-wrap: wrap; padding: 2px 0;
     }
     .link-url { display: none; }
     .lbtn {
-      flex-shrink: 0; padding: 8px 14px;
-      font-size: .78rem; font-weight: 700;
-      border: none; border-radius: var(--radius-sm);
+      flex-shrink: 0; padding: 7px 13px;
+      font-size: .74rem; font-weight: 700;
+      border: none; border-radius: var(--r-sm);
       cursor: pointer; transition: all .13s;
-      font-family: var(--font);
-      touch-action: manipulation;
+      font-family: var(--font); touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
     .lbtn.copy { background: var(--accent-l); color: var(--accent); }
     .lbtn.open { background: var(--accent); color: #fff; box-shadow: 0 2px 6px var(--accent-glow); }
     .lbtn.save { background: var(--green-l); color: var(--green); }
-    .lbtn.share { background: #fff3e0; color: var(--orange); }
-    .lbtn.copy:hover { background: #dde6fc; }
+    .lbtn.share { background: var(--orange-l); color: var(--orange); }
+    .lbtn.copy:hover { background: #dde5fc; }
     .lbtn.open:hover { background: var(--accent-d); }
-    .lbtn.save:hover { background: #d0f0e3; }
+    .lbtn.save:hover { background: #ccf0e0; }
     .lbtn.share:hover { background: #ffe0b2; }
     .lbtn.copied { background: var(--green-l); color: var(--green); }
     .lbtn:active { transform: scale(.95); }
 
-    /* ─── MODAL BACKDROP + MODAL ─── */
+    /* ── MODAL ── */
     .modal-backdrop {
       position: fixed; inset: 0;
-      background: rgba(10,15,40,.45);
-      backdrop-filter: blur(3px);
+      background: rgba(10,15,38,.42);
+      backdrop-filter: blur(4px);
       z-index: 200;
       display: flex; align-items: center; justify-content: center;
       padding: 16px;
     }
     .modal-backdrop.hidden { display: none; }
     .modal {
-      background: var(--surface); border-radius: 16px;
-      padding: 28px; width: 100%; max-width: 480px;
-      box-shadow: var(--shadow-lg);
-      display: flex; flex-direction: column; gap: 20px;
+      background: var(--surface); border-radius: var(--r-lg);
+      padding: 24px; width: 100%; max-width: 480px;
+      box-shadow: var(--sh-lg);
+      display: flex; flex-direction: column; gap: 18px;
       border: 1px solid var(--border);
+      max-height: 92vh; overflow-y: auto;
     }
-    .modal-title { font-size: 1.05rem; font-weight: 800; }
-    .modal-fields { display: flex; flex-direction: column; gap: 14px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding-top: 4px; }
+    .modal-title { font-size: 1rem; font-weight: 800; }
+    .modal-fields { display: flex; flex-direction: column; gap: 13px; }
+    .modal-actions { display: flex; gap: 9px; justify-content: flex-end; }
 
-    /* ─── LOOKUP DROPDOWN ─── */
+    /* ── LOOKUP ── */
     .lookup-wrap { position: relative; }
     .lookup-results {
       position: absolute; top: calc(100% + 4px); left: 0; right: 0;
       background: var(--surface);
       border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
+      border-radius: var(--r);
+      box-shadow: var(--sh-lg);
       max-height: 200px; overflow-y: auto;
       z-index: 10; display: none;
     }
@@ -561,7 +534,7 @@
     .lookup-item {
       display: flex; align-items: center; gap: 9px;
       padding: 9px 12px; cursor: pointer;
-      transition: background .12s; font-size: .84rem;
+      transition: background .12s; font-size: .83rem;
     }
     .lookup-item:hover { background: var(--accent-l); }
     .lookup-item img {
@@ -570,95 +543,96 @@
       background: #fff; padding: 2px; flex-shrink: 0;
     }
     .lookup-item .li-code { font-weight: 700; }
-    .lookup-item .li-name { font-size: .73rem; color: var(--sub); }
-    .lookup-item .li-bin { font-size: .7rem; font-family: var(--mono); color: var(--accent); margin-left: auto; }
-
-    .field-hint { font-size: .7rem; margin-top: 3px; font-weight: 500; }
+    .lookup-item .li-name { font-size: .72rem; color: var(--sub); }
+    .lookup-item .li-bin { font-size: .68rem; font-family: var(--mono); color: var(--accent); margin-left: auto; }
+    .field-hint { font-size: .68rem; margin-top: 2px; font-weight: 500; }
     .field-hint.ok { color: var(--green); }
     .field-hint.err { color: var(--red); }
     .field-hint.warn { color: var(--orange); }
 
-    /* ─── BUTTONS ─── */
+    /* ── BUTTONS ── */
     .btn {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 9px 16px; border-radius: var(--radius-sm);
-      font-family: var(--font); font-size: .82rem; font-weight: 700;
-      border: none; cursor: pointer; transition: all .14s;
+      padding: 8px 15px; border-radius: var(--r-sm);
+      font-family: var(--font); font-size: .8rem; font-weight: 700;
+      border: none; cursor: pointer; transition: all .13s;
       touch-action: manipulation;
     }
     .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-glow); }
     .btn-primary:hover { background: var(--accent-d); }
     .btn-danger { background: var(--red); color: #fff; }
-    .btn-danger:hover { background: #a93226; }
+    .btn-danger:hover { background: #a32320; }
     .btn-ghost { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); }
     .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-sm { padding: 5px 10px; font-size: .75rem; }
-    .btn-icon { padding: 6px 9px; border-radius: 7px; font-size: .82rem; }
+    .btn-sm { padding: 5px 10px; font-size: .73rem; }
+    .btn-icon { padding: 6px 8px; border-radius: 7px; font-size: .8rem; }
 
-    /* ─── MANAGE TABLE ─── */
+    /* ── MANAGE TABLE ── */
     .manage-toolbar input:focus { border-color: var(--accent); background: #fff; }
     .accounts-table th {
       background: var(--surface2);
-      font-size: .71rem; font-weight: 800; color: var(--sub);
+      font-size: .68rem; font-weight: 800; color: var(--sub);
       text-transform: uppercase; letter-spacing: .07em;
-      padding: 10px 14px; text-align: left;
+      padding: 9px 13px; text-align: left;
       border-bottom: 1px solid var(--border);
     }
     .accounts-table tr:last-child td { border-bottom: none; }
-    .td-mono { font-family: var(--mono); font-size: .8rem; }
+    .td-mono { font-family: var(--mono); font-size: .78rem; }
     .td-bank { display: flex; align-items: center; gap: 8px; }
-    .td-bank img { width: 28px; height: 28px; object-fit: contain; border-radius: 5px; border: 1px solid var(--border); background: #fff; padding: 2px; }
-    .tag { padding: 2px 9px; border-radius: 20px; font-size: .73rem; font-weight: 700; }
+    .td-bank img { width: 26px; height: 26px; object-fit: contain; border-radius: 5px; border: 1px solid var(--border); background: #fff; padding: 2px; }
+    .tag { padding: 2px 8px; border-radius: 20px; font-size: .7rem; font-weight: 700; }
     .tag-blue { background: var(--accent-l); color: var(--accent); }
     .actions-cell { display: flex; gap: 4px; }
 
-    /* ─── TOAST ─── */
+    /* ── TOAST ── */
     #toast {
-      position: fixed; bottom: 24px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
+      position: fixed; bottom: 22px; left: 50%;
+      transform: translateX(-50%) translateY(18px);
       background: var(--text); color: #fff;
-      padding: 11px 22px; border-radius: 12px;
-      font-size: .83rem; font-weight: 600;
-      opacity: 0; transition: all .25s;
+      padding: 10px 20px; border-radius: 12px;
+      font-size: .8rem; font-weight: 600;
+      opacity: 0; transition: all .22s;
       pointer-events: none; z-index: 500;
-      box-shadow: 0 4px 20px rgba(15,22,41,.25);
+      box-shadow: 0 4px 20px rgba(13,21,36,.2);
       white-space: nowrap;
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ─── CUSTOM QR MODAL ─── */
+    /* ── CUSTOM QR MODAL ── */
     .cqr-backdrop {
       position: fixed; inset: 0;
-      background: rgba(10,15,40,.5);
-      backdrop-filter: blur(4px);
+      background: rgba(10,15,38,.48);
+      backdrop-filter: blur(5px);
       z-index: 300;
       display: flex; align-items: center; justify-content: center;
+      padding: 14px;
       opacity: 0; pointer-events: none;
       transition: opacity .18s;
     }
     .cqr-backdrop.open { opacity: 1; pointer-events: all; }
     .cqr-modal {
       background: var(--surface);
-      border-radius: 20px;
-      width: min(96vw, 860px);
-      max-height: 90vh;
+      border-radius: var(--r-lg);
+      width: min(95vw, 840px);
+      max-height: 92dvh;
       display: flex; flex-direction: column;
-      box-shadow: 0 24px 80px rgba(10,15,40,.25);
-      transform: translateY(16px); transition: transform .2s;
+      box-shadow: 0 24px 80px rgba(10,15,38,.22);
+      transform: translateY(14px) scale(.98);
+      transition: transform .2s;
       overflow: hidden; border: 1px solid var(--border);
     }
-    .cqr-backdrop.open .cqr-modal { transform: translateY(0); }
+    .cqr-backdrop.open .cqr-modal { transform: translateY(0) scale(1); }
     .cqr-modal-head {
-      display: flex; align-items: center; gap: 12px;
-      padding: 18px 22px;
+      display: flex; align-items: center; gap: 11px;
+      padding: 16px 20px;
       border-bottom: 1px solid var(--border); flex-shrink: 0;
       background: var(--surface2);
     }
-    .cqr-modal-head h2 { font-size: 1rem; font-weight: 800; flex: 1; margin: 0; }
+    .cqr-modal-head h2 { font-size: .95rem; font-weight: 800; flex: 1; margin: 0; }
     .cqr-modal-close {
-      width: 32px; height: 32px; border: none;
-      background: var(--border); border-radius: 8px;
-      cursor: pointer; font-size: 1rem; color: var(--sub);
+      width: 30px; height: 30px; border: none;
+      background: var(--surface3); border-radius: 8px;
+      cursor: pointer; font-size: .95rem; color: var(--sub);
       display: flex; align-items: center; justify-content: center;
       transition: all .12s;
     }
@@ -668,26 +642,26 @@
       flex: 1; overflow: hidden; min-height: 0;
     }
     .cqr-left {
-      padding: 20px; overflow-y: auto;
+      padding: 18px; overflow-y: auto;
       border-right: 1px solid var(--border);
-      display: flex; flex-direction: column; gap: 14px;
+      display: flex; flex-direction: column; gap: 13px;
     }
     .cqr-right {
       display: flex; align-items: center; justify-content: center;
-      padding: 20px; background: var(--bg);
+      padding: 18px; background: var(--bg);
     }
-
-    .cqr-field { display: flex; flex-direction: column; gap: 5px; }
+    .cqr-field { display: flex; flex-direction: column; gap: 4px; }
     .cqr-field label {
-      font-size: .72rem; font-weight: 700; color: var(--sub);
-      text-transform: uppercase; letter-spacing: .04em;
+      font-size: .66rem; font-weight: 700; color: var(--sub2);
+      text-transform: uppercase; letter-spacing: .05em;
     }
     .cqr-field input, .cqr-field select {
-      padding: 9px 12px;
-      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-      font-family: var(--font); font-size: .875rem;
+      padding: 8px 11px;
+      border: 1.5px solid var(--border); border-radius: var(--r-sm);
+      font-family: var(--font); font-size: .83rem;
       color: var(--text); background: var(--surface2);
       outline: none; transition: all .15s;
+      appearance: none; -webkit-appearance: none;
     }
     .cqr-field input:focus, .cqr-field select:focus {
       border-color: var(--accent); background: var(--surface);
@@ -697,7 +671,7 @@
     .cqr-bank-results {
       position: absolute; top: calc(100% + 4px); left: 0; right: 0;
       background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: var(--radius); box-shadow: var(--shadow-lg);
+      border-radius: var(--r); box-shadow: var(--sh-lg);
       max-height: 180px; overflow-y: auto; z-index: 10; display: none;
     }
     .cqr-bank-results.show { display: block; }
@@ -707,222 +681,175 @@
     }
     .cqr-bank-item:hover { background: var(--accent-l); }
     .cqr-bank-item img {
-      width: 24px; height: 24px; object-fit: contain;
+      width: 22px; height: 22px; object-fit: contain;
       border-radius: 4px; border: 1px solid var(--border);
       background: #fff; padding: 1px; flex-shrink: 0;
     }
-    .cqr-bank-item .bi-name { font-size: .83rem; font-weight: 700; }
-    .cqr-bank-item .bi-bin { font-size: .7rem; color: var(--sub); font-family: var(--mono); margin-left: auto; }
+    .cqr-bank-item .bi-name { font-size: .8rem; font-weight: 700; }
+    .cqr-bank-item .bi-bin { font-size: .68rem; color: var(--sub); font-family: var(--mono); margin-left: auto; }
     .cqr-selected-bank {
       display: none; align-items: center; gap: 10px;
-      background: var(--accent-l); border: 1.5px solid rgba(41,82,227,.2);
-      border-radius: var(--radius-sm); padding: 10px 12px;
+      background: var(--accent-l); border: 1.5px solid rgba(41,82,227,.18);
+      border-radius: var(--r-sm); padding: 9px 11px;
     }
     .cqr-selected-bank.show { display: flex; }
     .cqr-selected-bank img {
-      width: 28px; height: 28px; object-fit: contain;
+      width: 26px; height: 26px; object-fit: contain;
       border-radius: 5px; border: 1px solid var(--border);
       background: #fff; padding: 2px;
     }
-    .cqr-selected-bank .csb-name { font-size: .84rem; font-weight: 700; }
-    .cqr-selected-bank .csb-sub { font-size: .7rem; color: var(--accent); font-family: var(--mono); margin-top: 1px; }
+    .cqr-selected-bank .csb-name { font-size: .82rem; font-weight: 700; }
+    .cqr-selected-bank .csb-sub { font-size: .67rem; color: var(--accent); font-family: var(--mono); margin-top: 1px; }
     .cqr-change {
-      margin-left: auto; font-size: .73rem; color: var(--accent);
-      background: none; border: 1.5px solid rgba(41,82,227,.25);
-      cursor: pointer; padding: 3px 10px; border-radius: 6px;
+      margin-left: auto; font-size: .71rem; color: var(--accent);
+      background: none; border: 1.5px solid rgba(41,82,227,.22);
+      cursor: pointer; padding: 3px 9px; border-radius: 6px;
       font-family: var(--font); font-weight: 600; transition: all .12s;
     }
     .cqr-change:hover { background: var(--surface); }
-    .cqr-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .cqr-actions { display: flex; gap: 8px; padding-top: 4px; }
+    .cqr-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .cqr-actions { display: flex; gap: 7px; padding-top: 2px; }
     .cqr-gen-btn {
-      flex: 1; padding: 11px;
+      flex: 1; padding: 10px;
       background: var(--accent); color: #fff;
-      border: none; border-radius: var(--radius-sm);
-      font-family: var(--font); font-size: .88rem; font-weight: 800;
+      border: none; border-radius: var(--r-sm);
+      font-family: var(--font); font-size: .85rem; font-weight: 800;
       cursor: pointer; transition: all .13s;
       box-shadow: 0 2px 8px var(--accent-glow);
     }
     .cqr-gen-btn:hover { background: var(--accent-d); }
     .cqr-reset-btn {
-      padding: 11px 16px;
+      padding: 10px 14px;
       background: var(--surface2); color: var(--sub);
       border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-family: var(--font); font-size: .84rem; font-weight: 600;
+      border-radius: var(--r-sm);
+      font-family: var(--font); font-size: .8rem; font-weight: 600;
       cursor: pointer; transition: all .12s;
     }
     .cqr-reset-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* CQR QR Preview */
+    /* CQR preview */
     .cqr-qr-shell {
-      background: var(--surface); border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(41,82,227,.1);
-      overflow: hidden; width: 280px;
+      background: var(--surface); border-radius: var(--r-lg);
+      box-shadow: var(--sh-lg); overflow: hidden; width: 260px;
       border: 1px solid var(--border);
     }
     .cqr-qr-head {
-      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      padding: 11px 13px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; gap: 9px;
+      background: var(--surface2);
     }
     .cqr-qr-head img {
-      width: 28px; height: 28px; object-fit: contain;
+      width: 26px; height: 26px; object-fit: contain;
       border-radius: 5px; border: 1px solid var(--border);
       background: #fff; padding: 2px; flex-shrink: 0;
     }
-    .cqr-qh-name { font-size: .82rem; font-weight: 700; }
-    .cqr-qh-stk { font-size: .68rem; color: var(--sub); font-family: var(--mono); margin-top: 1px; }
+    .cqr-qh-name { font-size: .78rem; font-weight: 700; }
+    .cqr-qh-stk { font-size: .65rem; color: var(--sub); font-family: var(--mono); margin-top: 1px; }
     .cqr-qh-amt {
       margin-left: auto; background: var(--green-l); color: var(--green);
-      font-size: .72rem; font-weight: 700;
-      padding: 2px 9px; border-radius: 20px; white-space: nowrap;
+      font-size: .68rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px; white-space: nowrap;
       font-family: var(--mono);
     }
-    .cqr-qr-body { padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-    .cqr-qr-wrap { position: relative; width: 220px; height: 220px; }
-    .cqr-qr-wrap img { width: 220px; height: 220px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); display: none; }
+    .cqr-qr-body { padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .cqr-qr-wrap { position: relative; width: 200px; height: 200px; }
+    .cqr-qr-wrap img { width: 200px; height: 200px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); display: none; }
     .cqr-qr-wrap img.visible { display: block; }
     .cqr-qr-loading {
-      position: absolute; inset: 0; background: rgba(247,248,252,.85);
+      position: absolute; inset: 0; background: rgba(248,249,253,.85);
       border-radius: 8px; display: none; align-items: center; justify-content: center;
     }
     .cqr-qr-loading.show { display: flex; }
     .cqr-empty {
-      width: 220px; height: 220px;
+      width: 200px; height: 200px;
       border-radius: 8px; border: 2px dashed var(--border2);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 8px; color: var(--sub2); font-size: .8rem;
+      gap: 7px; color: var(--sub2); font-size: .76rem;
       text-align: center; line-height: 1.5;
       background: var(--surface2);
     }
     .cqr-link-row {
-      width: 100%; display: flex; align-items: center; gap: 6px;
+      width: 100%; display: flex; align-items: center; gap: 5px;
       background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 6px 10px;
+      border-radius: 8px; padding: 5px 9px;
     }
     .cqr-link-url {
-      font-size: .64rem; color: var(--sub); font-family: var(--mono);
+      font-size: .6rem; color: var(--sub); font-family: var(--mono);
       flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-
-    @media (max-width: 700px) {
-      .cqr-modal-body { grid-template-columns: 1fr; grid-template-rows: auto auto; }
-      .cqr-right { border-top: 1px solid var(--border); }
+    @media (max-width: 680px) {
+      .cqr-modal-body { grid-template-columns: 1fr; }
+      .cqr-right { border-top: 1px solid var(--border); padding: 14px; }
     }
 
-    /* ─── MOBILE ─── */
+    /* ── MOBILE TABS ── */
     .mob-tabs { display: none; }
 
     @media (max-width: 720px) {
       body { overflow: hidden; }
-
-      #tab-qr { overflow: hidden; flex: 1; display: flex; flex-direction: column; }
+      #tab-qr { display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 0; }
       .layout {
         display: flex; flex-direction: row;
         width: 200vw;
-        height: calc(100dvh - 56px - 54px);
+        flex: 1; min-height: 0;
         overflow: hidden;
         transition: transform .3s cubic-bezier(.4,0,.2,1);
       }
       .layout.show-right { transform: translateX(-50%); }
-
       .left {
         width: 100vw; flex-shrink: 0;
         height: 100%; overflow: hidden;
         border-right: none; display: flex;
         flex-direction: column; background: var(--bg);
       }
-      .left-body {
-        flex: 1; overflow: hidden;
-        padding: 10px 12px 0;
-        display: flex; flex-direction: column; gap: 0;
-      }
-
+      .left-search { padding: 10px 11px 6px; }
       #bank-picker {
-        display: flex; flex-direction: column;
-        flex: 1; min-height: 0; overflow: hidden;
-      }
-      #bank-search {
-        padding: 11px 14px !important; font-size: .9rem !important;
-        border-radius: 12px !important; margin-bottom: 8px !important;
-        flex-shrink: 0;
-      }
-      #bank-search-clear { right: 12px !important; }
-      #bank-search-count { flex-shrink: 0; }
-      .bank-list-wrap {
         flex: 1; min-height: 0;
-        border-radius: 12px !important; overflow: hidden;
+        padding: 0 11px 6px;
       }
-      #bank-list {
-        display: flex !important; flex-direction: column !important; gap: 4px !important;
-        height: 100% !important; max-height: 100% !important;
-        overflow-y: scroll !important; overflow-x: hidden !important;
-        padding: 6px !important;
-        scroll-behavior: smooth;
-        scrollbar-gutter: stable;
-        -webkit-overflow-scrolling: touch;
-      }
-      .bank-card { padding: 9px 10px !important; border-radius: 10px !important; gap: 8px !important; }
+      #bank-search { padding: 10px 34px 10px 13px !important; font-size: .86rem !important; }
+      #bank-list { gap: 4px !important; padding: 5px !important; }
+      .bank-card { padding: 8px 9px !important; }
       .bank-card img { width: 30px !important; height: 30px !important; }
-      .bc-name { font-size: .78rem !important; }
-      .bc-bank { font-size: .65rem !important; }
-      .bc-sub { font-size: .65rem !important; }
-      .bc-copy-stk { opacity: 1 !important; font-size: .6rem !important; padding: 2px 6px !important; }
-
+      .bc-name { font-size: .77rem !important; }
+      .bc-sub { font-size: .63rem !important; }
+      .bc-copy-stk { opacity: 1 !important; font-size: .58rem !important; padding: 2px 6px !important; }
       .mob-fields-card {
-        flex-shrink: 0; background: var(--surface);
-        border-top: 1px solid var(--border);
-        padding: 10px 12px 12px;
-        display: flex; flex-direction: column; gap: 8px;
-        margin: 0 -12px;
+        flex-shrink: 0; padding: 8px 11px 10px !important; gap: 6px !important;
       }
-      .input-row { flex-direction: row !important; gap: 8px !important; }
-      .input-row > .field:first-child { flex: 2; }
-      .field-template-wrap { display: flex !important; flex: 1 !important; }
-      .field-template-wrap select { padding: 7px 6px !important; font-size: .72rem !important; }
-      .field label { font-size: .63rem !important; }
-      .mob-fields-card { padding: 7px 10px 10px !important; gap: 6px !important; }
-      .field input, .field select { padding: 8px 10px !important; font-size: .8rem !important; border-radius: 9px !important; }
+      .field label { font-size: .62rem !important; }
+      .field input, .field select { padding: 7px 10px !important; font-size: .79rem !important; }
+      .field-template-wrap { max-width: 90px !important; }
       .field-nameac-wrap { display: none !important; }
-
       .right {
-        width: 100vw; flex-shrink: 0;
-        height: 100%; overflow-y: auto;
-        padding: 10px 10px calc(env(safe-area-inset-bottom, 0px) + 10px);
+        width: 100vw; flex-shrink: 0; height: 100%;
+        overflow-y: auto; padding: 10px 10px calc(env(safe-area-inset-bottom,0px) + 10px);
         align-items: flex-start; justify-content: center;
       }
       .right::before { display: none; }
-      .qr-shell { width: 100%; max-width: 100%; border-radius: 14px; }
-      .qr-header { padding: 10px 12px !important; }
-      .qr-header img { width: 26px !important; height: 26px !important; }
-      .qh-name { font-size: .78rem !important; }
-      .qh-stk { font-size: .65rem !important; }
-      .qh-amount { font-size: .68rem !important; padding: 2px 8px !important; }
-      .qr-body { padding: 10px 10px 10px !important; gap: 10px !important; }
-      .qr-wrap { max-width: 260px !important; }
-      .qr-placeholder { max-width: 260px !important; }
-      .lbtn { padding: 9px 12px !important; font-size: .78rem !important; border-radius: 8px !important; }
-      .link-row { gap: 5px !important; flex-wrap: wrap !important; justify-content: center !important; }
-      .refresh-btn { width: 32px !important; height: 32px !important; top: 10px !important; right: 10px !important; }
-
-      .topbar { padding: 0 12px; gap: 8px; height: 56px; }
-      .topbar h1 { font-size: .84rem; }
+      .qr-shell { width: 100%; max-width: 100%; border-radius: var(--r); }
+      .qr-header { padding: 10px 11px !important; }
+      .qr-body { padding: 12px 12px 10px !important; gap: 10px !important; }
+      .qr-wrap { max-width: 240px !important; }
+      .qr-placeholder { max-width: 240px !important; }
+      .lbtn { padding: 8px 11px !important; font-size: .74rem !important; }
+      .refresh-btn { width: 30px !important; height: 30px !important; top: 10px !important; right: 10px !important; }
+      .topbar { padding: 0 11px; gap: 7px; }
+      .topbar-title { font-size: .84rem; }
       .from-file { display: none; }
-      .btn-topbar { font-size: .72rem; padding: 7px 10px; }
-
-      #toast { bottom: calc(env(safe-area-inset-bottom, 0px) + 62px); }
-
+      .btn-top { font-size: .7rem; padding: 6px 10px; }
+      #toast { bottom: calc(env(safe-area-inset-bottom,0px) + 64px); }
       .mob-tabs {
-        display: flex; height: 54px;
+        display: flex; height: var(--mob-tab-h); flex-shrink: 0;
         background: var(--surface);
         border-top: 1px solid var(--border);
-        flex-shrink: 0;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
       }
       .mob-tab {
         flex: 1; display: flex; align-items: center;
-        justify-content: center; gap: 6px;
-        font-size: .86rem; font-weight: 800; color: var(--sub);
+        justify-content: center; gap: 5px;
+        font-size: .82rem; font-weight: 700; color: var(--sub);
         border: none; background: none; cursor: pointer;
         font-family: var(--font);
         border-top: 2.5px solid transparent;
@@ -930,7 +857,10 @@
         -webkit-tap-highlight-color: transparent;
       }
       .mob-tab.active { color: var(--accent); border-top-color: var(--accent); background: var(--accent-l); }
-      .mob-tab:active { opacity: .7; }
+    }
+
+    @media (max-width: 420px) {
+      .topbar-actions .btn-top-momo { display: none; }
     }
   </style>
 </head>
@@ -949,12 +879,15 @@
         <polygon points="1,2 7,2 9,8 11,2 17,2 9,16" fill="white"/>
       </svg>
     </div>
-    <h1>Viet<span>QR</span></h1>
+    <span class="topbar-title">Viet<span>QR</span></span>
   </a>
   <span class="chip" id="bank-count">…</span>
   <div class="from-file">📄 <span>VietQR.xlsx</span> · List_bank</div>
-  <button class="btn-topbar btn-topbar-primary" id="open-custom-qr" onclick="openCustomQR()">+ Tạo QR tùy chỉnh</button>
-  <button class="btn-topbar btn-topbar-momo" onclick="window.open('https://kiehtt.vercel.app/','_blank')">MoMo Quick ↗</button>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-actions">
+    <button class="btn-top btn-top-primary" id="open-custom-qr" onclick="openCustomQR()">+ Tạo QR tùy chỉnh</button>
+    <button class="btn-top btn-top-momo" onclick="window.open('https://kiehtt.vercel.app/','_blank')">MoMo ↗</button>
+  </div>
 </div>
 
 <!-- TAB QR -->
@@ -962,36 +895,35 @@
   <div class="layout">
     <!-- LEFT -->
     <div class="left">
-      <div class="left-body">
-        <div class="section-label">Tài khoản</div>
-
-        <!-- hidden selected badge (kept for JS compat) -->
-        <div id="selected-badge">
-          <div class="sel-row1">
-            <img id="sel-logo" src="" alt="" />
-            <div style="min-width:0;flex:1">
-              <div class="sel-name" id="sel-name"></div>
-            </div>
-          </div>
-          <div class="sel-row2">
-            <div class="sel-chip"><span class="lbl">STK</span><span class="val" id="sel-stk"></span></div>
-            <div class="sel-chip" id="sel-nameac-chip" style="display:none"><span class="lbl">Chủ TK</span><span class="val green" id="sel-nameac"></span></div>
+      <!-- hidden for JS compat -->
+      <div id="selected-badge">
+        <div class="sel-row1">
+          <img id="sel-logo" src="" alt="" />
+          <div style="min-width:0;flex:1">
+            <div class="sel-name" id="sel-name"></div>
           </div>
         </div>
-
-        <div id="bank-picker">
-          <div class="search-wrap" style="margin-bottom:8px">
-            <input type="text" id="bank-search" placeholder="Tìm ngân hàng, STK…" autocomplete="off" />
-            <button id="bank-search-clear" onclick="clearBankSearch()" title="Xoá tìm kiếm">✕</button>
-          </div>
-          <div id="bank-search-count"></div>
-          <div class="bank-list-wrap" id="bank-list-wrap">
-            <div id="bank-list"></div>
-          </div>
+        <div class="sel-row2">
+          <div class="sel-chip"><span class="lbl">STK</span><span class="val" id="sel-stk"></span></div>
+          <div class="sel-chip" id="sel-nameac-chip" style="display:none"><span class="lbl">Chủ TK</span><span class="val green" id="sel-nameac"></span></div>
         </div>
       </div>
 
-      <!-- Fields bottom card -->
+      <div class="left-search">
+        <div class="search-wrap">
+          <input type="text" id="bank-search" placeholder="Tìm ngân hàng, STK…" autocomplete="off" />
+          <button id="bank-search-clear" onclick="clearBankSearch()" title="Xoá">✕</button>
+        </div>
+        <div id="bank-search-count"></div>
+      </div>
+
+      <div id="bank-picker">
+        <div class="bank-list-wrap" id="bank-list-wrap">
+          <div id="bank-list"></div>
+        </div>
+      </div>
+
+      <!-- Fields bottom -->
       <div class="mob-fields-card">
         <div class="input-row">
           <div class="field">
@@ -1022,7 +954,7 @@
     <!-- RIGHT -->
     <div class="right">
       <button class="refresh-btn" id="refresh-btn" title="Tải lại QR">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
           <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
         </svg>
@@ -1060,7 +992,7 @@
   <!-- MOBILE BOTTOM TABS -->
   <div class="mob-tabs">
     <button class="mob-tab active" id="mob-tab-list" onclick="mobSwitch(0)">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
         <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
         <circle cx="3" cy="6" r="1.2" fill="currentColor" stroke="none"/>
         <circle cx="3" cy="12" r="1.2" fill="currentColor" stroke="none"/>
@@ -1069,7 +1001,7 @@
       Tài khoản
     </button>
     <button class="mob-tab" id="mob-tab-qr" onclick="mobSwitch(1)">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
         <rect x="3" y="14" width="7" height="7"/>
         <rect x="14" y="14" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/>
@@ -1085,7 +1017,7 @@
     <div class="modal-title" id="modal-title">Thêm tài khoản</div>
     <div class="modal-fields">
       <div class="field">
-        <label>Ngân hàng <span style="color:var(--red);font-size:.75rem">* (dò từ sheet API-io)</span></label>
+        <label>Ngân hàng <span style="color:var(--red);font-size:.72rem">* (dò từ sheet API-io)</span></label>
         <div class="lookup-wrap">
           <input type="text" id="f-bank-search" placeholder="Gõ tên hoặc mã ngân hàng…" autocomplete="off" oninput="filterBankLookup(this.value)" />
           <div class="lookup-results" id="bank-lookup-results"></div>
@@ -1096,7 +1028,7 @@
         <div class="field">
           <label>data__id</label>
           <input type="number" id="f-id" placeholder="VD: 38" class="readonly-field" readonly />
-          <div class="field-hint" id="hint-id" style="color:var(--sub);font-size:.68rem">Tự điền khi chọn ngân hàng</div>
+          <div class="field-hint" id="hint-id" style="color:var(--sub);font-size:.66rem">Tự điền khi chọn ngân hàng</div>
         </div>
         <div class="field">
           <label>list_name <span style="color:var(--red)">*</span></label>
@@ -1114,14 +1046,14 @@
         <input type="text" id="f-nameac" placeholder="VD: Nguyen Van A" oninput="validateNameAc()" />
         <div class="field-hint" id="hint-nameac"></div>
       </div>
-      <details style="font-size:.8rem;color:var(--sub)">
+      <details style="font-size:.78rem;color:var(--sub)">
         <summary style="cursor:pointer;font-weight:700;color:var(--text);padding:4px 0">👁 Xem trước VLOOKUP từ API-io</summary>
-        <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;background:var(--surface2);border-radius:10px;padding:12px;border:1px solid var(--border)">
+        <div style="margin-top:9px;display:flex;flex-direction:column;gap:5px;background:var(--surface2);border-radius:10px;padding:11px;border:1px solid var(--border)">
           <div style="display:flex;gap:8px"><span style="width:120px;flex-shrink:0;color:var(--sub)">data__name:</span><span id="pv-name" style="font-weight:600">—</span></div>
           <div style="display:flex;gap:8px"><span style="width:120px;flex-shrink:0;color:var(--sub)">data__code:</span><span id="pv-code" style="font-weight:600">—</span></div>
           <div style="display:flex;gap:8px"><span style="width:120px;flex-shrink:0;color:var(--sub)">data__bin:</span><span id="pv-bin" style="font-family:var(--mono);color:var(--accent);font-weight:600">—</span></div>
           <div style="display:flex;gap:8px"><span style="width:120px;flex-shrink:0;color:var(--sub)">data__shortName:</span><span id="pv-short" style="font-weight:600">—</span></div>
-          <div style="display:flex;gap:8px"><span style="width:120px;flex-shrink:0;color:var(--sub)">data__logo:</span><span id="pv-logo-url" style="color:var(--sub2);font-size:.7rem;word-break:break-all">—</span></div>
+          <div style="display:flex;gap:8px"><span style="width:120px;flex-shrink:0;color:var(--sub)">data__logo:</span><span id="pv-logo-url" style="color:var(--sub2);font-size:.67rem;word-break:break-all">—</span></div>
         </div>
       </details>
     </div>
@@ -1132,11 +1064,11 @@
   </div>
 </div>
 
-<!-- DELETE CONFIRM MODAL -->
+<!-- DELETE CONFIRM -->
 <div class="modal-backdrop hidden" id="confirm-backdrop">
-  <div class="modal" style="max-width:360px;gap:16px">
+  <div class="modal" style="max-width:360px;gap:14px">
     <div class="modal-title" style="color:var(--red)">🗑 Xác nhận xoá</div>
-    <p style="font-size:.88rem;color:var(--sub);line-height:1.6" id="confirm-msg"></p>
+    <p style="font-size:.85rem;color:var(--sub);line-height:1.65" id="confirm-msg"></p>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeConfirm()">Huỷ</button>
       <button class="btn btn-danger" id="confirm-ok-btn">Xoá</button>
@@ -1213,7 +1145,7 @@
           </div>
           <div class="cqr-qr-body">
             <div class="cqr-empty" id="cqr-empty">
-              <span style="font-size:2.2rem;opacity:.18">🏦</span>
+              <span style="font-size:2rem;opacity:.16">🏦</span>
               Chọn ngân hàng &amp; nhập STK<br>để tạo mã QR
             </div>
             <div class="cqr-qr-wrap" id="cqr-wrap" style="display:none">
@@ -1243,7 +1175,6 @@ async function loadXLSX(){
   try{
     const ab=await(await fetch("VietQR.xlsx")).arrayBuffer();
     workbook=XLSX.read(ab,{type:"array"});
-
     const apiName=workbook.SheetNames.find(n=>n.toLowerCase().includes("api"));
     if(apiName){
       API_BANKS=XLSX.utils.sheet_to_json(workbook.Sheets[apiName],{defval:""});
@@ -1259,13 +1190,11 @@ async function loadXLSX(){
         };
       });
     }
-
     const tmplSet=[...new Set(API_BANKS.map(r=>String(r["Template"]||"").trim()).filter(Boolean))];
     ["template-select","cqr-template"].forEach(id=>{
       const el=document.getElementById(id);
       el.innerHTML=tmplSet.map(t=>`<option value="${t}">${t}</option>`).join("");
     });
-
     reloadListBank();
     document.getElementById("loading-overlay").classList.add("hidden");
   }catch(e){
@@ -1313,14 +1242,14 @@ function reloadListBank(){
 function renderCards(list){
   const el=document.getElementById("bank-list");
   el.innerHTML="";
-  if(!list.length){el.innerHTML='<p style="padding:10px;font-size:.8rem;color:var(--sub)">Không tìm thấy</p>';return;}
+  if(!list.length){el.innerHTML='<p style="padding:10px;font-size:.78rem;color:var(--sub)">Không tìm thấy</p>';return;}
   list.forEach(acc=>{
     const d=document.createElement("div");
     d.className="bank-card"+(selected&&selected.bin===acc.bin&&selected.stk===acc.stk?" active":"");
     d.innerHTML=`
       <img src="${acc.logo}" alt="" onerror="this.style.display='none'" />
       <div class="bc-info">
-        <div class="bc-name">${acc.label||acc.code} <span style="font-weight:500;color:var(--sub);font-size:.68rem">${acc.shortName||''}</span></div>
+        <div class="bc-name">${acc.label||acc.code} <span style="font-weight:500;color:var(--sub);font-size:.65rem">${acc.shortName||''}</span></div>
         <div class="bc-sub">STK: ${acc.stk}</div>
         ${acc.nameAc?`<div class="bc-nameac">👤 ${acc.nameAc}</div>`:''}
       </div>
@@ -1329,7 +1258,7 @@ function renderCards(list){
     d.querySelector('.bc-copy-stk').addEventListener('click', e => {
       e.stopPropagation();
       navigator.clipboard.writeText(acc.stk).then(()=>{
-        const btn = e.target; btn.textContent='✓'; btn.style.color='var(--green)';
+        const btn=e.target; btn.textContent='✓'; btn.style.color='var(--green)';
         setTimeout(()=>{btn.textContent='Copy STK';btn.style.color='';},1500);
       });
     });
@@ -1430,10 +1359,10 @@ function renderManageTable(){
     a.shortName.toLowerCase().includes(q)||a.nameAc.toLowerCase().includes(q)||
     a.code.toLowerCase().includes(q)
   );
-  const manageCount = document.getElementById("manage-count");
+  const manageCount=document.getElementById("manage-count");
   if(manageCount) manageCount.textContent=filtered.length+" / "+ACCOUNTS.length+" tài khoản";
   const tbody=document.getElementById("manage-tbody");
-  if(!tbody) return;
+  if(!tbody)return;
   tbody.innerHTML="";
   filtered.forEach((acc)=>{
     const realIdx=ACCOUNTS.indexOf(acc);
@@ -1444,8 +1373,8 @@ function renderManageTable(){
         <div class="td-bank">
           <img src="${acc.logo}" alt="" onerror="this.style.display='none'" />
           <div>
-            <div style="font-weight:700;font-size:.84rem">${acc.shortName||acc.code}</div>
-            <div class="td-mono" style="font-size:.7rem">${acc.code} · BIN ${acc.bin}</div>
+            <div style="font-weight:700;font-size:.82rem">${acc.shortName||acc.code}</div>
+            <div class="td-mono" style="font-size:.68rem">${acc.code} · BIN ${acc.bin}</div>
           </div>
         </div>
       </td>
@@ -1476,7 +1405,6 @@ function openAddModal(){
   document.getElementById("bank-lookup-results").classList.remove("show");
   document.getElementById("modal-backdrop").classList.remove("hidden");
 }
-
 function openEditModal(idx){
   editIndex=idx;
   const acc=ACCOUNTS[idx];
@@ -1493,9 +1421,7 @@ function openEditModal(idx){
   document.getElementById("bank-lookup-results").classList.remove("show");
   document.getElementById("modal-backdrop").classList.remove("hidden");
 }
-
 function closeModal(){document.getElementById("modal-backdrop").classList.add("hidden");}
-
 function filterBankLookup(q){
   const res=document.getElementById("bank-lookup-results");
   const term=q.toLowerCase().trim();
@@ -1507,7 +1433,7 @@ function filterBankLookup(q){
     const bin=String(b["data__bin"]||"");
     return code.includes(term)||name.includes(term)||short.includes(term)||bin.includes(term);
   }).slice(0,10);
-  if(!matches.length){res.innerHTML='<div class="lookup-item" style="color:var(--sub)">Không tìm thấy ngân hàng</div>';res.classList.add("show");return;}
+  if(!matches.length){res.innerHTML='<div class="lookup-item" style="color:var(--sub)">Không tìm thấy</div>';res.classList.add("show");return;}
   res.innerHTML=matches.map(b=>`
     <div class="lookup-item" onclick="selectApiBank(${b['data__id']})">
       <img src="${b['data__logo']||''}" alt="" onerror="this.style.display='none'" />
@@ -1519,7 +1445,6 @@ function filterBankLookup(q){
     </div>`).join("");
   res.classList.add("show");
 }
-
 function selectApiBank(id){
   selectedApiBank=API_BANKS.find(b=>b["data__id"]==id)||null;
   if(!selectedApiBank)return;
@@ -1530,7 +1455,6 @@ function selectApiBank(id){
   document.getElementById("hint-bank").textContent="✓ "+selectedApiBank["data__name"];
   updatePreview(selectedApiBank);
 }
-
 function updatePreview(b){
   document.getElementById("pv-name").textContent=b["data__name"]||"—";
   document.getElementById("pv-code").textContent=b["data__code"]||"—";
@@ -1583,7 +1507,7 @@ function saveModal(){
   const newEntry={
     label:document.getElementById("f-listname").value.trim(),
     stk:document.getElementById("f-datanum").value.trim(),
-    bin, name:String(selectedApiBank["data__name"]||""),
+    bin,name:String(selectedApiBank["data__name"]||""),
     code:String(selectedApiBank["data__code"]||""),
     shortName:String(selectedApiBank["data__shortName"]||selectedApiBank["data__short_name"]||""),
     logo:String(selectedApiBank["data__logo"]||""),
@@ -1621,7 +1545,7 @@ document.getElementById("confirm-ok-btn").addEventListener("click",()=>{
 });
 
 // ========== CUSTOM QR ==========
-let cqrBank=null, cqrTimer=null, cqrUrl="";
+let cqrBank=null,cqrTimer=null,cqrUrl="";
 function openCustomQR(){
   document.getElementById("cqr-backdrop").classList.add("open");
   cqrFilterBank("");
@@ -1673,12 +1597,12 @@ function cqrChangeBank(){
 }
 function cqrSchedule(){
   clearTimeout(cqrTimer);
-  cqrTimer=setTimeout(cqrGenerate, 120);
+  cqrTimer=setTimeout(cqrGenerate,120);
 }
 function cqrGenerate(){
-  if(!cqrBank) return;
+  if(!cqrBank)return;
   const stk=document.getElementById("cqr-stk").value.trim();
-  if(!stk) return;
+  if(!stk)return;
   const name=document.getElementById("cqr-name").value.trim();
   const amount=document.getElementById("cqr-amount").value.trim();
   const template=document.getElementById("cqr-template").value||"BdT8CDO";
@@ -1690,7 +1614,7 @@ function cqrGenerate(){
   if(memo)   p.push(`addInfo=${encodeURIComponent(memo)}`);
   if(name)   p.push(`accountName=${encodeURIComponent(name)}`);
   if(p.length) url+="?"+p.join("&");
-  if(url===cqrUrl) return;
+  if(url===cqrUrl)return;
   cqrUrl=url;
   document.getElementById("cqr-qr-head").style.display="flex";
   document.getElementById("cqr-h-logo").src=cqrBank["data__logo"]||"";
@@ -1708,22 +1632,22 @@ function cqrGenerate(){
   const tmp=new Image();
   tmp.onload=()=>{
     if(reqId!==cqrGenerate._id)return;
-    img.src=url; img.classList.add("visible");
+    img.src=url;img.classList.add("visible");
     loading.classList.remove("show");
   };
-  tmp.onerror=()=>{if(reqId!==cqrGenerate._id)return; loading.classList.remove("show");};
+  tmp.onerror=()=>{if(reqId!==cqrGenerate._id)return;loading.classList.remove("show");};
   tmp.src=url;
   document.getElementById("cqr-link-url").textContent=url;
   const cb=document.getElementById("cqr-copy-btn");
-  cb.textContent="Copy"; cb.classList.remove("copied");
+  cb.textContent="Copy";cb.classList.remove("copied");
   cb.onclick=()=>navigator.clipboard.writeText(url).then(()=>{
-    cb.textContent="✓ OK"; cb.classList.add("copied");
+    cb.textContent="✓ OK";cb.classList.add("copied");
     setTimeout(()=>{cb.textContent="Copy";cb.classList.remove("copied");},1800);
   });
 }
 cqrGenerate._id=0;
 function cqrReset(){
-  cqrBank=null; cqrUrl="";
+  cqrBank=null;cqrUrl="";
   ["cqr-bank-search","cqr-stk","cqr-name","cqr-amount","cqr-memo"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("cqr-template").value="BdT8CDO";
   document.getElementById("cqr-sel-bank").classList.remove("show");
@@ -1752,11 +1676,11 @@ document.getElementById("confirm-backdrop").addEventListener("click",e=>{if(e.ta
 // MOBILE TAB SWITCH
 function mobSwitch(idx){
   const layout=document.querySelector('.layout');
-  if(!layout) return;
+  if(!layout)return;
   if(idx===1) layout.classList.add('show-right');
   else layout.classList.remove('show-right');
-  document.getElementById('mob-tab-list').classList.toggle('active', idx===0);
-  document.getElementById('mob-tab-qr').classList.toggle('active', idx===1);
+  document.getElementById('mob-tab-list').classList.toggle('active',idx===0);
+  document.getElementById('mob-tab-qr').classList.toggle('active',idx===1);
 }
 
 loadXLSX();
@@ -1765,57 +1689,51 @@ loadXLSX();
 const amountDisplay=document.getElementById('amount-display');
 const amountHidden=document.getElementById('amount');
 const amountClear=document.getElementById('amount-clear');
-
 function parseRawAmount(str){ return str.replace(/\D/g,''); }
 function formatAmount(raw){
-  if(!raw) return '';
+  if(!raw)return'';
   return Number(raw).toLocaleString('vi-VN');
 }
-
-amountDisplay.addEventListener('input', function(){
+amountDisplay.addEventListener('input',function(){
   const raw=parseRawAmount(this.value);
   amountHidden.value=raw;
   const formatted=raw?formatAmount(raw):'';
   this.value=formatted?formatted+' ₫':'';
   amountClear.style.display=raw?'block':'none';
-  if(selected) scheduleQR(120);
+  if(selected)scheduleQR(120);
 });
-
-amountDisplay.addEventListener('focus', function(){
+amountDisplay.addEventListener('focus',function(){
   const raw=amountHidden.value;
   this.value=raw?formatAmount(raw):'';
 });
-
-amountDisplay.addEventListener('blur', function(){
+amountDisplay.addEventListener('blur',function(){
   const raw=amountHidden.value;
   this.value=raw?formatAmount(raw)+' ₫':'';
-  if(raw) saveAmountHistory(raw);
+  if(raw)saveAmountHistory(raw);
 });
-
 function clearAmount(){
-  amountDisplay.value=''; amountHidden.value='';
+  amountDisplay.value='';amountHidden.value='';
   amountClear.style.display='none';
-  if(selected) scheduleQR(80);
+  if(selected)scheduleQR(80);
   amountDisplay.focus();
 }
 
 // ========== AMOUNT HISTORY ==========
 const AMT_KEY='vqr_amt_history';
 function loadAmountHistory(){
-  try{ return JSON.parse(localStorage.getItem(AMT_KEY)||'[]'); }catch(e){ return []; }
+  try{return JSON.parse(localStorage.getItem(AMT_KEY)||'[]');}catch(e){return[];}
 }
 function saveAmountHistory(raw){
-  if(!raw||Number(raw)<=0) return;
+  if(!raw||Number(raw)<=0)return;
   let hist=loadAmountHistory().filter(v=>v!==raw);
-  hist.unshift(raw);
-  hist=hist.slice(0,6);
-  try{ localStorage.setItem(AMT_KEY, JSON.stringify(hist)); }catch(e){}
+  hist.unshift(raw);hist=hist.slice(0,6);
+  try{localStorage.setItem(AMT_KEY,JSON.stringify(hist));}catch(e){}
   renderAmountHistory();
 }
 function renderAmountHistory(){
   const hist=loadAmountHistory();
   const wrap=document.getElementById('amount-history');
-  if(!hist.length){ wrap.style.display='none'; return; }
+  if(!hist.length){wrap.style.display='none';return;}
   wrap.style.display='flex';
   wrap.innerHTML=hist.map(v=>`<button class="amt-chip" data-val="${v}">${formatAmount(v)} ₫</button>`).join('');
   wrap.querySelectorAll('.amt-chip').forEach(btn=>{
@@ -1824,7 +1742,7 @@ function renderAmountHistory(){
       amountHidden.value=raw;
       amountDisplay.value=formatAmount(raw)+' ₫';
       amountClear.style.display='block';
-      if(selected) scheduleQR(80);
+      if(selected)scheduleQR(80);
     });
   });
 }
@@ -1834,8 +1752,7 @@ renderAmountHistory();
 const bankSearchInput=document.getElementById('bank-search');
 const bankSearchClear=document.getElementById('bank-search-clear');
 const bankSearchCount=document.getElementById('bank-search-count');
-
-bankSearchInput.addEventListener('input', function(){
+bankSearchInput.addEventListener('input',function(){
   const q=this.value.toLowerCase().trim();
   bankSearchClear.style.display=q?'block':'none';
   const filtered=!q?ACCOUNTS:ACCOUNTS.filter(a=>
@@ -1850,7 +1767,6 @@ bankSearchInput.addEventListener('input', function(){
   }
   renderCards(filtered);
 });
-
 function clearBankSearch(){
   bankSearchInput.value='';
   bankSearchClear.style.display='none';
@@ -1860,24 +1776,23 @@ function clearBankSearch(){
 }
 
 // ========== SAVE QR IMAGE ==========
-document.getElementById('save-btn').addEventListener('click', async function(){
+document.getElementById('save-btn').addEventListener('click',async function(){
   const url=document.getElementById('link-url').textContent;
-  if(!url) return;
+  if(!url)return;
   const btn=this;
-  btn.textContent='⏳ Đang tải…'; btn.disabled=true;
+  btn.textContent='⏳ Đang tải…';btn.disabled=true;
   try{
     const resp=await fetch(url);
     const blob=await resp.blob();
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
     const name=selected?`QR_${selected.label}_${selected.stk}`.replace(/\s/g,'_'):'QR_VietQR';
-    a.download=name+'.png';
-    a.click();
+    a.download=name+'.png';a.click();
     URL.revokeObjectURL(a.href);
-    btn.textContent='✓ Đã lưu'; btn.style.background='var(--green-l)'; btn.style.color='var(--green)';
-    setTimeout(()=>{ btn.textContent='⬇ Lưu ảnh'; btn.style.background=''; btn.style.color=''; btn.disabled=false; },2000);
+    btn.textContent='✓ Đã lưu';btn.style.background='var(--green-l)';btn.style.color='var(--green)';
+    setTimeout(()=>{btn.textContent='⬇ Lưu ảnh';btn.style.background='';btn.style.color='';btn.disabled=false;},2000);
   }catch(e){
-    btn.textContent='⬇ Lưu ảnh'; btn.disabled=false;
+    btn.textContent='⬇ Lưu ảnh';btn.disabled=false;
     showToast('Lỗi tải ảnh, thử nút Mở ↗ rồi lưu thủ công');
   }
 });
@@ -1885,38 +1800,37 @@ document.getElementById('save-btn').addEventListener('click', async function(){
 // ========== SHARE QR ==========
 (function(){
   const shareBtn=document.getElementById('share-btn');
-  if(navigator.share) shareBtn.style.display='flex';
-  shareBtn.addEventListener('click', async ()=>{
+  if(navigator.share)shareBtn.style.display='flex';
+  shareBtn.addEventListener('click',async()=>{
     const url=document.getElementById('link-url').textContent;
-    if(!url) return;
+    if(!url)return;
     try{
       const resp=await fetch(url);
       const blob=await resp.blob();
-      const file=new File([blob], 'VietQR.png', {type:'image/png'});
+      const file=new File([blob],'VietQR.png',{type:'image/png'});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({ files:[file], title:'VietQR', text: selected?`${selected.label} – STK: ${selected.stk}`:'Mã QR thanh toán' });
+        await navigator.share({files:[file],title:'VietQR',text:selected?`${selected.label} – STK: ${selected.stk}`:'Mã QR thanh toán'});
       } else {
-        await navigator.share({ title:'VietQR', url });
+        await navigator.share({title:'VietQR',url});
       }
-    }catch(e){ if(e.name!=='AbortError') showToast('Không thể chia sẻ'); }
+    }catch(e){if(e.name!=='AbortError')showToast('Không thể chia sẻ');}
   });
 })();
 
 // ========== REMEMBER LAST SELECTED ==========
 const SEL_KEY='vqr_last_sel';
 function saveLastSelected(acc){
-  try{ localStorage.setItem(SEL_KEY, JSON.stringify({bin:acc.bin, stk:acc.stk})); }catch(e){}
+  try{localStorage.setItem(SEL_KEY,JSON.stringify({bin:acc.bin,stk:acc.stk}));}catch(e){}
 }
 function restoreLastSelected(){
   try{
     const saved=JSON.parse(localStorage.getItem(SEL_KEY)||'null');
-    if(!saved) return false;
+    if(!saved)return false;
     const acc=ACCOUNTS.find(a=>a.bin===saved.bin&&a.stk===saved.stk);
-    if(acc){ selectAccount(acc); return true; }
+    if(acc){selectAccount(acc);return true;}
   }catch(e){}
   return false;
 }
-
 const _origSelectAccount=selectAccount;
 selectAccount=function(acc){
   _origSelectAccount(acc);
@@ -1927,16 +1841,16 @@ selectAccount=function(acc){
 (function(){
   var list=document.getElementById('bank-list');
   var wrap=document.getElementById('bank-list-wrap');
-  if(!list||!wrap) return;
+  if(!list||!wrap)return;
   function checkScroll(){
     var atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<8;
     var scrolled=list.scrollTop>8;
-    wrap.classList.toggle('at-bottom', atBottom);
-    wrap.classList.toggle('scrolled', scrolled);
+    wrap.classList.toggle('at-bottom',atBottom);
+    wrap.classList.toggle('scrolled',scrolled);
   }
-  list.addEventListener('scroll', checkScroll, {passive:true});
-  var obs=new MutationObserver(()=>{ checkScroll(); });
-  obs.observe(list, {childList:true});
+  list.addEventListener('scroll',checkScroll,{passive:true});
+  var obs=new MutationObserver(()=>{checkScroll();});
+  obs.observe(list,{childList:true});
   checkScroll();
 })();
 </script>
