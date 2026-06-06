@@ -42,7 +42,7 @@ module.exports = (req, res) => {
         const listName = String(r['list_name'] || '');
 
         // Build QR base URL
-        const qrBase = `https://img.vietqr.io/image/${bin}-${stk}-${tmpl}.png`;
+        const qrBase = `https://img.vietqr.io/image/${bin}-${stk}-${tmpl}.png&amount=`;
         const params = new URLSearchParams();
         if (nameAc) params.set('accountName', nameAc);
         const qrUrl = qrBase + (params.toString() ? '?' + params.toString() : '');
