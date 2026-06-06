@@ -45,7 +45,8 @@ module.exports = (req, res) => {
         const qrBase = `https://img.vietqr.io/image/${bin}-${stk}-${tmpl}.png`;
         const params = new URLSearchParams();
         if (nameAc) params.set('accountName', nameAc);
-        const qrUrl = qrBase + (params.toString() ? '?' + params.toString() : '')+'&amount=';
+        const am = String(r['&amount='] || '').trim();
+        const qrUrl = qrBase + (params.toString() ? '?' + params.toString() : '')+(am)
 
         return {
           list_name:  listName,
