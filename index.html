@@ -888,20 +888,19 @@
       }
       .layout.show-right { transform: translateX(-50%); }
 
-      /* LEFT panel */
+      /* LEFT panel — grid layout đảm bảo không gap */
       .left {
         width: 100vw; flex-shrink: 0;
-        height: 100%; overflow: hidden;
+        height: 100%;
         border-right: none;
-        display: flex; flex-direction: column;
         background: var(--bg);
-        /* Enforce hard height — list cannot push fields out */
-        max-height: 100%;
+        display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        overflow: hidden;
       }
-      .left-search { padding: 10px 11px 6px; flex-shrink: 0; }
-      /* bank-picker takes all leftover space, min-height 0 so flex can shrink it */
+      .left-search { padding: 10px 11px 6px; }
       #bank-picker {
-        flex: 1 1 0; min-height: 0;
+        min-height: 0;
         padding: 0 11px 6px;
         overflow: hidden;
         display: flex; flex-direction: column;
@@ -915,13 +914,12 @@
       .bc-name { font-size: .76rem !important; }
       .bc-sub { font-size: .62rem !important; }
       .bc-copy-stk { opacity: 1 !important; font-size: .58rem !important; padding: 2px 6px !important; }
-      /* Fields card: always at bottom, never scrolls away */
+      /* Fields card: cố định dưới cùng */
       .mob-fields-card {
         flex-shrink: 0 !important;
         flex-grow: 0 !important;
         padding: 8px 11px 10px !important;
         gap: 6px !important;
-        /* visual separator */
         border-top: 1.5px solid var(--border) !important;
         box-shadow: 0 -4px 16px rgba(79,110,247,.06);
       }
