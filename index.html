@@ -188,7 +188,6 @@
       border-right: 1px solid var(--border);
       display: flex; flex-direction: column;
       overflow: hidden; min-height: 0;
-      height: 100%;
       background-image: linear-gradient(180deg, rgba(79,110,247,.03) 0%, transparent 30%);
     }
     .section-label { display: none; }
@@ -888,42 +887,44 @@
       }
       .layout.show-right { transform: translateX(-50%); }
 
-      /* LEFT panel — grid layout đảm bảo không gap */
+      /* LEFT panel - đơn giản, chắc chắn */
       .left {
         width: 100vw; flex-shrink: 0;
         height: 100%;
         border-right: none;
         background: var(--bg);
-        display: grid;
-        grid-template-rows: 0 auto 1fr auto;
+        display: flex; flex-direction: column;
         overflow: hidden;
       }
       #selected-badge { display: none !important; }
-      .left-search { padding: 10px 11px 6px; }
+      .left-search { flex-shrink: 0; padding: 10px 11px 6px; }
       #bank-picker {
-        min-height: 0;
+        flex: 1; min-height: 0;
         padding: 0 11px 6px;
-        overflow: hidden;
         display: flex; flex-direction: column;
+        overflow: hidden;
       }
-      /* bank-list-wrap fills bank-picker */
-      #bank-list-wrap { flex: 1 1 0; min-height: 0; position: relative; }
+      #bank-list-wrap {
+        flex: 1; min-height: 0;
+        position: relative;
+        overflow: hidden;
+      }
+      #bank-list {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        overflow-y: auto;
+      }
+      .mob-fields-card {
+        flex: 0 0 auto !important;
+        padding: 8px 11px 10px !important;
+        gap: 6px !important;
+        border-top: 1.5px solid var(--border) !important;
+      }
       #bank-search { padding: 10px 34px 10px 13px !important; font-size: .86rem !important; }
-      #bank-list { gap: 3px !important; padding: 4px !important; }
       .bank-card { padding: 7px 9px !important; }
       .bank-card img { width: 28px !important; height: 28px !important; }
       .bc-name { font-size: .76rem !important; }
       .bc-sub { font-size: .62rem !important; }
       .bc-copy-stk { opacity: 1 !important; font-size: .58rem !important; padding: 2px 6px !important; }
-      /* Fields card: cố định dưới cùng */
-      .mob-fields-card {
-        flex-shrink: 0 !important;
-        flex-grow: 0 !important;
-        padding: 8px 11px 10px !important;
-        gap: 6px !important;
-        border-top: 1.5px solid var(--border) !important;
-        box-shadow: 0 -4px 16px rgba(79,110,247,.06);
-      }
       .field label { font-size: .62rem !important; }
       .field input, .field select { padding: 7px 10px !important; font-size: .79rem !important; }
       .field-template-wrap { max-width: 90px !important; }
