@@ -228,13 +228,13 @@
 
     /* ── BANK LIST ── */
     #bank-picker {
-      flex: 1; min-height: 0;
+      flex: 1 1 0; min-height: 0;
       display: flex; flex-direction: column;
       padding: 0 10px 8px;
       overflow: hidden;
     }
     .bank-list-wrap {
-      flex: 1; min-height: 0;
+      flex: 1 1 0; min-height: 0;
       position: relative;
       border: 1px solid var(--border);
       border-radius: var(--r);
@@ -259,7 +259,8 @@
     .bank-list-wrap.scrolled::before { opacity: 1; }
     #bank-list {
       display: flex; flex-direction: column; gap: 1px;
-      height: 100%; overflow-y: auto; overflow-x: hidden;
+      position: absolute; inset: 0;
+      overflow-y: auto; overflow-x: hidden;
       padding: 4px;
       /* Beautiful custom scrollbar */
       scrollbar-width: thin;
@@ -351,6 +352,7 @@
     /* ── FIELDS BOTTOM ── */
     .mob-fields-card {
       flex-shrink: 0;
+      flex-grow: 0;
       background: rgba(255,255,255,.95);
       border-top: 1px solid var(--border);
       padding: 12px 12px 14px;
