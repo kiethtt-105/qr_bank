@@ -12,6 +12,8 @@ module.exports = (req, res) => {
 
     // Sheet API-io → BANK_MAP theo bin
     const apiSheet = wb.SheetNames.find(n => n.toLowerCase().includes('api'));
+    if (!apiSheet) return res.status(500).json({ success: false, error: 'Không tìm thấy sheet API-io trong file xlsx' });
+
     const apiRows = XLSX.utils.sheet_to_json(wb.Sheets[apiSheet], { defval: '' });
     const bankMap = {};
     apiRows.forEach(r => {
@@ -27,6 +29,8 @@ module.exports = (req, res) => {
 
     // Sheet List_bank → danh sách tài khoản
     const listSheet = wb.SheetNames.find(n => n.toLowerCase().includes('list'));
+    if (!listSheet) return res.status(500).json({ success: false, error: 'Không tìm thấy sheet List_bank trong file xlsx' });
+
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[listSheet], { defval: '' });
 
     const accounts = rows
@@ -41,25 +45,19 @@ module.exports = (req, res) => {
         const nameAc = String(r['name_ac'] || '');
         const listName = String(r['list_name'] || '');
 
-        // Build QR base URL
-        const qrBase = `https://img.vietqr.io/image/${bin}-${stk}-${tmpl}.png`;
-        const params = new URLSearchParams();
-        if (nameAc) params.set('accountName', nameAc);
-        const qrUrl = qrBase + (params.toString() ? '?' + params.toString() : '');
-
         return {
           list_name:  listName,
           stk,
           bin,
-          bank_name:  String(r['data__name']  || info.name      || ''),
-          bank_code:  String(r['data__code']  || info.code      || ''),
+          bank_name:  String(r['data__name']      || info.name      || ''),
+          bank_code:  String(r['data__code']      || info.code      || ''),
           short_name: String(r['data__shortName'] || info.shortName || ''),
-          logo:       String(r['data__logo']  || info.logo      || ''),
+          logo:       String(r['data__logo']      || info.logo      || ''),
           name_ac:    nameAc,
           template:   tmpl,
-          qr_url:     qrUrl,
-          // Helper: thêm amount vào qr_url
-          // VD: qr_url + "&amount=50000"
+          // Client tự ghép: amount, addInfo vào qr_base khi cần
+          // VD: `${qr_base}?amount=50000&addInfo=chuyenkhoan&accountName=...`
+          qr_base: `https://img.vietqr.io/image/${bin}-${stk}-${tmpl}.png`,
         };
       });
 
