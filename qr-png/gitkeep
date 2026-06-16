@@ -1,0 +1,2 @@
+# Thư mục này chứa các ảnh QR PNG được lưu thủ công.
+# Upload file .png vào đây rồi push lên git → Vercel sẽ serve tại /qr-png/filename.png
