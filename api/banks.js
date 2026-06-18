@@ -12,7 +12,7 @@ module.exports = (req, res) => {
 
     // Sheet API-io → BANK_MAP theo bin
     const apiSheet = wb.SheetNames.find(n => n.toLowerCase().includes('api'));
-    if (!apiSheet) return res.status(500).json({ success: false, error: 'Không tìm thấy sheet API-io trong file xlsx' });
+    if (!apiSheet) return res.status(500).json({ success: false, error: 'Không tìm thấy sheet API-io' });
 
     const apiRows = XLSX.utils.sheet_to_json(wb.Sheets[apiSheet], { defval: '' });
     const bankMap = {};
@@ -29,7 +29,7 @@ module.exports = (req, res) => {
 
     // Sheet List_bank → danh sách tài khoản
     const listSheet = wb.SheetNames.find(n => n.toLowerCase().includes('list'));
-    if (!listSheet) return res.status(500).json({ success: false, error: 'Không tìm thấy sheet List_bank trong file xlsx' });
+    if (!listSheet) return res.status(500).json({ success: false, error: 'Không tìm thấy sheet List_bank' });
 
     const rows = XLSX.utils.sheet_to_json(wb.Sheets[listSheet], { defval: '' });
 
@@ -42,26 +42,34 @@ module.exports = (req, res) => {
         if (/e/i.test(stk)) stk = Number(r['data_num']).toFixed(0);
 
         const tmpl = info.template || 'BdT8CDO';
-        const nameAc = String(r['name_ac'] || '');
-        const listName = String(r['list_name'] || '');
 
         return {
-          list_name:  listName,
+          list_name:  String(r['list_name'] || ''),
           stk,
           bin,
           bank_name:  String(r['data__name']      || info.name      || ''),
           bank_code:  String(r['data__code']      || info.code      || ''),
           short_name: String(r['data__shortName'] || info.shortName || ''),
           logo:       String(r['data__logo']      || info.logo      || ''),
-          name_ac:    nameAc,
+          name_ac:    String(r['name_ac'] || ''),
           template:   tmpl,
-          // Client tự ghép: amount, addInfo vào qr_base khi cần
-          // VD: `${qr_base}?amount=50000&addInfo=chuyenkhoan&accountName=...`
-          qr_base: `https://img.vietqr.io/image/${bin}-${stk}-${tmpl}.png`,
+          qr_base:    `https://img.vietqr.io/image/${bin}-${stk}-${tmpl}.png`,
         };
       });
 
-    res.status(200).json({ success: true, count: accounts.length, accounts });
+    const { list } = req.query;
+
+    // ?list=xxx → filter theo list_name, trả full accounts
+    if (list) {
+      const filtered = accounts.filter(
+        a => a.list_name.toLowerCase() === list.toLowerCase()
+      );
+      return res.status(200).json({ success: true, count: filtered.length, accounts: filtered });
+    }
+
+    // Không có query → trả danh sách list_name unique (để hiển thị chọn)
+    const listNames = [...new Set(accounts.map(a => a.list_name).filter(Boolean))];
+    return res.status(200).json({ success: true, count: listNames.length, lists: listNames });
 
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
